@@ -94,7 +94,6 @@ class Program
     name = method_name(num)
     method = "def #{name}\n#{s}\nend\n"
     begin
-      puts method
       eval(method)
       @lines[num] = t
     rescue SyntaxError
@@ -127,7 +126,6 @@ module Compiler
   def translate_token(command,expression)
     return nil if command.empty?
     token = command.shift
-    puts "~~ #{token[0..0]}"
     operators = "+-*/=<>()"
     expression_terminators = [",",":",";","THEN","TO"]
     

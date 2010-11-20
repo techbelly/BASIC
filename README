@@ -1,8 +1,18 @@
 Silly basic interpreter in ruby 
 
-$ ruby ./basic.rb
+ $ ruby ./basic.rb
 
-READY
+ READY
 
-> LOAD "battle/robotmissile.bas"
-> RUN
+ > 10 PRINT "THIS IS A BIT SILLY"
+ > 20 GOTO 10
+ > RUN
+
+Or if you prefer
+
+ $ ruby ./basic.rb
+
+ READY
+
+ > LOAD "battle/robotmissile.bas"
+ > RUN
