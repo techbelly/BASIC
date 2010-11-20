@@ -82,6 +82,21 @@ class Program
   def self.clear()
     @lines = {}
   end
+
+  def self.renumber(increment=10)
+    old_numbers = @lines.keys.sort
+    new_numbers = (1..@lines.length).map{ |v| v * increment.to_i }
+    retarget = Hash[*old_numbers.zip(new_numbers).flatten]
+    @lines = @lines.inject({}){ |new_lines, (num, parts)|
+      new_num = retarget[num]
+      (1...parts.length).each do |i|
+        if %w[GOTO GOSUB].include?(parts[i-1])
+          parts[i] = retarget[parts[i].to_i].to_s
+        end
+      end
+      new_lines.merge(new_num => parts)
+    }
+  end
   
   def self.method_name(num)
     method_name = "line_#{num}".to_sym
@@ -300,6 +315,8 @@ def execute(line,rest)
     Program.run
   when "LIST"
     Program.list
+  when "RENUMBER"
+    Program.renumber *rest
   when "LOAD"
     Program.clear
     filename = rest.shift.strip_str("\"")
