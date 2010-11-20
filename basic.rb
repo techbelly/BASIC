@@ -126,14 +126,14 @@ module Compiler
   def translate_token(command,expression)
     return nil if command.empty?
     token = command.shift
-    operators = "+-*/=<>()"
+    operators = ["+","-","*","/","=","<",">","(",")","OR","AND"]
     expression_terminators = [",",":",";","THEN","TO"]
     
     # TODO: SHOULD GENERATE THIS FROM BasicLib
     functions = ["RND","INT","CHR$","INKEY$","ABS","VAL","ASC","SGN","SQR","SIN","ATN"]
 
     if operators.include?(token)
-     token == "=" ? "==" : token
+     token == "=" ? "==" : token.downcase
     elsif expression_terminators.include?(token)
      command.unshift(token)
      nil
@@ -182,10 +182,17 @@ module Compiler
   
   def x_INPUT(c,num)
     var = varname(c.shift)
-    statements <<-END
-      @#{var} = self.readline("? ")
-      return nextline(#{num})
-    END
+    if var =~ /_string/
+      statements <<-END
+        @#{var} = self.readline("? ")
+        return nextline(#{num})
+      END
+    else
+      statements <<-END
+        @#{var} = self.readline("? ").to_i
+        return nextline(#{num})
+      END
+    end
   end
   
   def statements(text)
