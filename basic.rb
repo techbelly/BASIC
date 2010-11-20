@@ -231,7 +231,7 @@ module Compiler
     statements = []
     while not c.empty?
       c,out = expression(c)
-      statements << "print (#{out})"
+      statements << "print(#{out})"
       if c.empty?
         statements << "print \"\\n\""
       else
