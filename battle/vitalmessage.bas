@@ -1,3 +1,5 @@
+5 REM     Taken from Usborne's 1982 book
+6 REM     "Computer Battlegames"
 10 CLS
 20 PRINT "VITAL MESSAGE"
 30 PRINT
@@ -12,6 +14,10 @@
 120 PRINT "SEND THIS MESSAGE:"
 130 PRINT
 140 PRINT M$
+145 REM      In the original program, this next loop 
+146 REM      went around 8 times for the ZX81,
+147 REM      180 time for Apple, TRS-80 and VIC-20. And 
+148 REM      400 times for BBC. Let's try 60,000
 150 FOR I=1 TO D*60000
 160 NEXT I
 170 CLS

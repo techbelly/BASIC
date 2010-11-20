@@ -152,6 +152,10 @@ module Compiler
     "return nextline(#{num})"
   end
   
+  def x_REM(c,num)
+    [nextline(num)]
+  end
+  
   def x_STOP(c,num)
     ["raise StopException"]
   end

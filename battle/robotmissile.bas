@@ -1,3 +1,5 @@
+5 REM     Taken from Usborne's 1982 book
+6 REM     "Computer Battlegames"
 10 PRINT "ROBOT MISSILE"
 20 PRINT
 30 PRINT "TYPE THE CORRECT CODE"
