@@ -1,0 +1,8 @@
+Silly basic interpreter in ruby 
+
+$ ruby ./basic.rb
+
+READY
+
+> LOAD "battle/robotmissile.bas"
+> RUN
