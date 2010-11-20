@@ -70,7 +70,9 @@ class Program
   end
   
   def self.list()
-    puts @lines.inspect
+    @lines.sort_by{ |num, _| num }.each do |num, line|
+      puts "#{num} #{line.join(" ")}"
+    end
   end
   
   def self.next(num)
