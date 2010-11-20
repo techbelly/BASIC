@@ -156,6 +156,10 @@ module Compiler
     ["raise StopException"]
   end
   
+  def x_CLS(c,num)
+    ['system("clear")',nextline(num)]
+  end
+  
   def x_RETURN(c,num)
     ["return"]
   end
