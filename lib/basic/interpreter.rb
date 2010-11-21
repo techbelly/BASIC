@@ -107,8 +107,7 @@ module Basic
       end
     end
 
-    def reader(cmd=nil)
-      cmd ||= lambda { Readline.readline('> ',true) }
+    def reader(cmd)
       while line = cmd.call()
         first,*rest = read(line)
         if first =~ /\d+/
@@ -119,10 +118,11 @@ module Basic
       end
     end
 
-    def run
+    def run(cmd=nil)
+      cmd ||= lambda { Readline.readline('> ',true) }
       Program.clear
       print "\nREADY\n"
-      reader
+      reader cmd
     end
 
     extend self
