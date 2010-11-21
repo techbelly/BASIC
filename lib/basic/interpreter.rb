@@ -22,7 +22,7 @@ class String
 end
 
 module Basic
-  module CLI
+  module Interpreter
     def define(number,tokens)
       commands = tokens.split(':')
       statements = []
