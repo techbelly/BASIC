@@ -60,9 +60,12 @@ module Basic
             return false
           end
         end)
+      when "EXIT"
+        return false
       else
         puts "HUH?"
       end
+      return true
     end
 
     def read(input,output=[],token='')
@@ -111,7 +114,7 @@ module Basic
         if first =~ /\d+/
           compile first.to_i, rest
         else
-          execute first,rest
+          execute first,rest or return
         end
       end
     end
