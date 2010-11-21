@@ -1,6 +1,6 @@
 Silly basic interpreter in ruby 
 
- $ ruby ./basic.rb
+ $ ./BASIC
 
  READY
 
@@ -10,7 +10,7 @@ Silly basic interpreter in ruby
 
 Or if you prefer
 
- $ ruby ./basic.rb
+ $ ./BASIC
 
  READY
 

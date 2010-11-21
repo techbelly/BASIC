@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+require "basic/interpreter"
+Basic::Interpreter.run
