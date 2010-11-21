@@ -1,3 +1,5 @@
+require "basic/basiclib"
+
 module Basic
   module Compiler
     extend self
@@ -18,22 +20,17 @@ module Basic
     def translate_token(command,expression)
       return nil if command.empty?
       token = command.shift
-      operators = ["+","-","*","/","=","<",">","(",")","OR","AND"]
-      expression_terminators = [",",":",";","THEN","TO"]
 
-      # TODO: SHOULD GENERATE THIS FROM BasicLib
-      functions = ["RND","INT","CHR$","INKEY$","ABS","VAL","ASC","SGN","SQR","SIN","ATN"]
-
-      if operators.include?(token)
+      if BasicLib::OPERATORS.include?(token)
        token == "=" ? "==" : token.downcase
-      elsif expression_terminators.include?(token)
+      elsif BasicLib::EXPRESSION_TERMINATORS.include?(token)
        command.unshift(token)
        nil
       elsif token =~ /\d+/
        token
       elsif token[0..0] == "\""
        token
-      elsif functions.include?(token)
+      elsif BasicLib::FUNCTIONS.include?(token)
        "self.#{varname(token)}"
       else
        "@"+varname(token)

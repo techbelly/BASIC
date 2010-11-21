@@ -17,9 +17,18 @@ module Basic
     end
 
     def self.list()
-      @lines.sort_by{ |num, _| num }.each do |num, line|
-
-        puts "#{num} #{line.join(" ")}"
+      @lines.sort_by{ |num, _| num }.each do |num, statements|
+        print num
+        spaced = statements.map{ |s|
+          s =~ /^[A-Z]{2,}$/ && !FUNCTIONS.include?(s)
+        }
+        (0...statements.length).each do |i|
+          if i == 0 || spaced[i] || spaced[i-1]
+            print " "
+          end
+          print statements[i]
+        end
+        puts
       end
     end
 
