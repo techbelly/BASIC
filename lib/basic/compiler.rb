@@ -17,12 +17,23 @@ module Basic
       [command,expression.join("")]
     end
 
+    def basic_operator_to_ruby(op)
+      case op
+      when "="
+        "=="
+      when "<>"
+        "!="
+      else
+        op.downcase
+      end
+    end
+
     def translate_token(command,expression)
       return nil if command.empty?
       token = command.shift
 
       if BasicLib::OPERATORS.include?(token)
-       token == "=" ? "==" : token.downcase
+       basic_operator_to_ruby(token)
       elsif BasicLib::EXPRESSION_TERMINATORS.include?(token)
        command.unshift(token)
        nil
@@ -133,6 +144,7 @@ module Basic
     def x_PRINT(c,num)
       # PRINT "Hello"
       statements = []
+      statements << "print \"\\n\"" if c.empty?   
       while not c.empty?
         c,out = expression(c)
         statements << "print(#{out})"

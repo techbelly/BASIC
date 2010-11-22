@@ -29,6 +29,7 @@ module Basic
       commands.each do |c|
         statements << Compiler.compile(c,number)
       end
+      puts statements.inspect
       Program.define(number,tokens,statements.join("\n"))
     end
 
@@ -83,8 +84,17 @@ module Basic
       elsif first == "\""
         output.push(token) unless token.empty?
         read_string(rest, output)
-
-      elsif "+-*/=<>().:;,".include?(first)
+      
+      # HANDLE <> - is this the only 2-character operator?
+      elsif "<".include?(first)
+        output.push(token) unless token.empty?
+        if rest[0..0] == ">"
+          read(rest[1..-1], output+["<>"],"")
+        else
+          read(rest,output+["<"],"")
+        end
+          
+      elsif "+-*/>=().:;,".include?(first)
         output.push(token) unless token.empty?
         read(rest, output + [first], "")
 
