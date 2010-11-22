@@ -29,7 +29,6 @@ module Basic
       commands.each do |c|
         statements << Compiler.compile(c,number)
       end
-      puts statements.inspect
       Program.define(number,tokens,statements.join("\n"))
     end
 
