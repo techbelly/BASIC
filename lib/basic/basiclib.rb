@@ -15,5 +15,18 @@ module Basic
     def int(num)
       num.to_i
     end
+    
+    def sqr(num)
+      Math.sqrt(num)
+    end
+    
+    def atn(num)
+      Math.atan(num)
+    end
+    
+    def abs(num)
+      num.abs
+    end
+    
   end
 end

@@ -23,6 +23,10 @@ module Basic
         "=="
       when "<>"
         "!="
+      when "AND"
+        "&&"
+      when "OR"
+        "||"
       else
         op.downcase
       end
@@ -37,7 +41,7 @@ module Basic
       elsif BasicLib::EXPRESSION_TERMINATORS.include?(token)
        command.unshift(token)
        nil
-      elsif token =~ /\d+/
+      elsif token =~ /^\d+$/
        token
       elsif token[0..0] == "\""
        token

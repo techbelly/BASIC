@@ -93,7 +93,7 @@ module Basic
           read(rest,output+["<"],"")
         end
           
-      elsif "+-*/>=().:;,".include?(first)
+      elsif "+-*/>=():;,".include?(first)
         output.push(token) unless token.empty?
         read(rest, output + [first], "")
 
