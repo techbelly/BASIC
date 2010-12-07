@@ -1,7 +1,7 @@
 module Basic
   module BasicLib
     FUNCTIONS = %w[ RND INT CHR$ INKEY$ ABS VAL ASC SGN SQR SIN ATN ]
-    OPERATORS = %w[ + - * / = <> < > ( ) OR AND ]
+    OPERATORS = %w[ + - * / = <> <= >= < > ( ) OR AND ]
     EXPRESSION_TERMINATORS = %w[ , : ; THEN TO ]
 
     def rnd(num)

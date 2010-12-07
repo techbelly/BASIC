@@ -84,16 +84,29 @@ module Basic
         output.push(token) unless token.empty?
         read_string(rest, output)
       
-      # HANDLE <> - is this the only 2-character operator?
       elsif "<".include?(first)
         output.push(token) unless token.empty?
-        if rest[0..0] == ">"
-          read(rest[1..-1], output+["<>"],"")
-        else
-          read(rest,output+["<"],"")
+        next_token = rest[0..0]
+        case next_token
+          when ">"
+            read(rest[1..-1], output+["<>"],"")
+          when "="
+            read(rest[1..-1], output+["<="],"")
+          else
+            read(rest,output+["<"],"")
         end
-          
-      elsif "+-*/>=():;,".include?(first)
+      
+      elsif ">".include?(first)
+        output.push(token) unless token.empty?
+        next_token = rest[0..0]
+        case next_token
+          when "="
+            read(rest[1..-1], output+[">="],"")
+          else
+            read(rest,output+[">"],"")
+        end
+         
+      elsif "+-*/=():;,".include?(first)
         output.push(token) unless token.empty?
         read(rest, output + [first], "")
 

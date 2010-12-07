@@ -32,6 +32,61 @@ class BasicTest < Test::Unit::TestCase
     assert_match /1\n2\n3\n4/, output
   end
 
+  def test_greater_than
+    output = capture <<-'END'
+      10 LET I = 4
+      20 IF I>3 THEN PRINT "GREATER THAN 3"
+      25 IF I>4 THEN PRINT "GREATER THAN 4"
+      30 IF I>5 THEN PRINT "GREATER THAN 5"
+      RUN
+    END
+    assert_match /GREATER THAN 3/, output
+  end
+
+  def test_less_than_or_equal_to
+    output = capture <<-'END'
+      10 LET I = 4
+      20 IF I<=3 THEN PRINT "LTE THAN 3"
+      25 IF I<=4 THEN PRINT "LTE THAN 4"
+      30 IF I<=5 THEN PRINT "LTE THAN 5"
+      RUN
+    END
+    assert_match /LTE THAN 4\nLTE THAN 5/, output
+  end
+  
+  def test_greater_than_or_equal_to
+    output = capture <<-'END'
+      10 LET I = 4
+      20 IF I>=3 THEN PRINT "GTE THAN 3"
+      25 IF I>=4 THEN PRINT "GTE THAN 4"
+      30 IF I>=5 THEN PRINT "GTE THAN 5"
+      RUN
+    END
+    assert_match /GTE THAN 3\nGTE THAN 4/, output
+  end
+  
+  def test_less_than
+    output = capture <<-'END'
+      10 LET I = 4
+      20 IF I<3 THEN PRINT "LESS THAN 3"
+      25 IF I<4 THEN PRINT "LESS THAN 4"
+      30 IF I<5 THEN PRINT "LESS THAN 5"
+      RUN
+    END
+    assert_match /LESS THAN 5/, output
+  end
+  
+  def test_not_equal_to
+    output = capture <<-'END'
+      10 LET I = 4
+      20 IF I<>3 THEN PRINT "NOT 3"
+      25 IF I<>4 THEN PRINT "NOT 4"
+      30 IF I<>5 THEN PRINT "NOT 5"
+      RUN
+    END
+    assert_match /NOT 3\nNOT 5/, output
+  end
+
   def test_should_list_program
     program = blockquote <<-'END'
       5 REM Comment
