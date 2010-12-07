@@ -1,2 +1,2 @@
 #!/bin/sh
-ruby -I lib bin/basic
+ruby -rubygems -I lib bin/basic

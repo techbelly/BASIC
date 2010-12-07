@@ -2,6 +2,8 @@ require "readline"
 require "basic/program"
 require "basic/compiler"
 
+$DEBUG=false
+
 class Array
   def split(delim)
     self.inject([[]]) do |c, e|
@@ -21,6 +23,12 @@ class String
   end
 end
 
+class Fixnum
+  def /(other)
+    self.to_f / other
+  end
+end
+
 module Basic
   module Interpreter
     def define(number,tokens)
@@ -28,6 +36,9 @@ module Basic
       statements = []
       commands.each do |c|
         statements << Compiler.compile(c,number)
+      end
+      if $DEBUG
+        puts statements.join("\n")
       end
       Program.define(number,tokens,statements.join("\n"))
     end

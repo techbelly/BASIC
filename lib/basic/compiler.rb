@@ -41,7 +41,7 @@ module Basic
       elsif BasicLib::EXPRESSION_TERMINATORS.include?(token)
        command.unshift(token)
        nil
-      elsif token =~ /^\d+$/
+      elsif token =~ /^\d+(\.\d+)?$/
        token
       elsif token[0..0] == "\""
        token
@@ -97,7 +97,7 @@ module Basic
         END
       else
         statements <<-END
-          @#{var} = self.readline("? ").to_i
+          @#{var} = self.readline("? ").to_f 
           return nextline(#{num})
         END
       end
@@ -148,16 +148,16 @@ module Basic
     def x_PRINT(c,num)
       # PRINT "Hello"
       statements = []
-      statements << "print \"\\n\"" if c.empty?   
+      statements << "self.print \"\\n\"" if c.empty?   
       while not c.empty?
         c,out = expression(c)
-        statements << "print(#{out})"
+        statements << "self.print(#{out})"
         if c.empty?
-          statements << "print \"\\n\""
+          statements << "self.print \"\\n\""
         else
           delim = c.shift
           if delim == ","
-            statements << "print \"\\t\""
+            statements << "self.print \"\\t\""
           elsif delim == ";"
             break if c.empty?
           end

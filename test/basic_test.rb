@@ -87,6 +87,16 @@ class BasicTest < Test::Unit::TestCase
     assert_match /NOT 3\nNOT 5/, output
   end
 
+  def test_integer_division_should_result_in_float
+    output = capture <<-'END'
+      10 LET I=4
+      20 LET J=3
+      30 PRINT I/J
+      RUN
+    END
+    assert_in_delta 4/3.0,output.to_f,0.0001
+  end 
+
   def test_should_list_program
     program = blockquote <<-'END'
       5 REM Comment
