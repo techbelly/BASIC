@@ -11,6 +11,9 @@
 • ELSE in IF statement
   10 IF A>B THEN GOTO 50 ELSE GOTO 20
 
+• Multiple statement lines
+  10 FOR I=1 TO 20: NEXT I
+
 I think that's it for a simple interpreter. Much refactoring and fun should follow.
 
 Staying clear of graphics for now, but should do something eventually.
