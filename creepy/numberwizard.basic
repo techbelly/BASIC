@@ -1,3 +1,5 @@
+5 REM     Taken from Usborne's 1983 book
+6 REM     "Creepy Computer Games"
 10 PRINT "THE NUMBER WIZARD"
 20 DIM A(10)
 30 LET T=8

@@ -77,7 +77,6 @@ class BasicTest < Test::Unit::TestCase
   end
   
   def test_dim_defines_an_array
-    $DE
     output = capture <<-'END'
       10 DIM A(8)
       20 LET B = 1

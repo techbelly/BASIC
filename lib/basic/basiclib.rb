@@ -1,8 +1,12 @@
 module Basic
   module BasicLib
-    FUNCTIONS = %w[ RND INT CHR$ SIN GET GET$ INKEY INKEY$ ABS SQR ATN ]
+    FUNCTIONS = %w[ VAL RND INT CHR$ SIN GET GET$ INKEY INKEY$ ABS SQR ATN ]
     OPERATORS = %w[ + - * / = <> <= >= < > ( ) OR AND ]
     EXPRESSION_TERMINATORS = %w[ , : ; THEN TO ]
+
+    def val(str)
+      str.to_i
+    end
 
     def rnd(num)
       rand*num.to_f
