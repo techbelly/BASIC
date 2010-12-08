@@ -31,18 +31,14 @@ module Basic
   module Interpreter
     def define(number,tokens)
       commands = tokens.split(':')
-      statements = []
-      commands.each do |c|
-        statements << Compiler.compile(c,number)
+      commands.each_with_index do |c,segment|
+        method_body = Compiler.compile(c,number,segment)
+        Program.define(number,segment,c,method_body)
       end
-      if $DEBUG
-        puts statements.join("\n")
-      end
-      Program.define(number,tokens,statements.join("\n"))
     end
 
     def compile(number,tokens)
-      if tokens.empty?
+      if tokens.empty? 
         Program.remove(number)
       else
         define number,tokens
@@ -57,6 +53,8 @@ module Basic
         Program.list
       when "RENUMBER"
         Program.renumber *rest
+      when "GENERATED"
+        Program.generated
       when "LOAD"
         Program.clear
         filename = rest.shift.strip_str("\"")

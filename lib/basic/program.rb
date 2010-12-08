@@ -17,27 +17,42 @@ module Basic
     end
 
     def self.list()
-      @lines.sort_by{ |num, _| num }.each do |num, statements|
+      @lines.sort_by{ |num, _| num }.each do |num, parts|
         print num
-        spaced = statements.map{ |s|
-          s =~ /^[A-Z]{2,}$/ && !FUNCTIONS.include?(s)
-        }
-        (0...statements.length).each do |i|
-          if i == 0 || spaced[i] || spaced[i-1]
-            print " "
+        parts.each do |statements|
+          spaced = statements.map{ |s|
+            s =~ /^[A-Z]{2,}$/ && !FUNCTIONS.include?(s)
+          }
+          (0...statements.length).each do |i|
+            if i == 0 || spaced[i] || spaced[i-1]
+              print " "
+            end
+            print statements[i]
           end
-          print statements[i]
         end
         puts
       end
     end
 
-    def self.next(num)
-       @lines.keys.select {|m| m > num }.min
+    def self.generated()
+      @generated.keys.sort.each do |k|
+        puts @generated[k]
+      end
+    end
+
+    def self.next(num,segment)
+       if @lines[num][segment+1]
+         [num,segment+1]
+       elsif next_line = @lines.keys.select {|m| m > num }.min
+         [next_line,0]
+       else
+         nil
+       end
     end
 
     def self.clear()
       @lines = {}
+      @generated = {}
     end
 
     def self.renumber(increment=10)
@@ -55,21 +70,26 @@ module Basic
       }
     end
 
-    def self.method_name(num)
-      method_name = "line_#{num}".to_sym
+    def self.method_name(num,seg=0)
+      method_name = "line_#{num}_#{seg}".to_sym
     end
 
     def self.remove(num)
+      @lines[num].each_with_index do |seg,i|
+         remove_method(method_name(num,i))
+         @generated.delete("#{num}_#{seg}")
+      end
       @lines.delete(num)
-      remove_method(method_name(num))
     end
 
-    def self.define(num,t,s)
-      name = method_name(num)
+    def self.define(num,seg,t,s)
+      name = method_name(num,seg)
       method = "def #{name}\n#{s}\nend\n"
       begin
         eval(method)
-        @lines[num] = t
+        @generated[[num,seg]] = method
+        @lines[num] = [] unless @lines[num]
+        @lines[num][seg] = t
       rescue SyntaxError
         puts "SYNTAX ERROR in LINE #{num}"
         puts t.join(" ")

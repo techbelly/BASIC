@@ -32,6 +32,14 @@ class BasicTest < Test::Unit::TestCase
     assert_match /1\n2\n3\n4/, output
   end
 
+  def test_for_loop_on_one_line
+    output = capture <<-'END'
+      10 FOR I=1 TO 4: PRINT I: NEXT I
+      RUN
+    END
+    assert_match /1\n2\n3\n4/, output
+  end
+
   def test_greater_than
     output = capture <<-'END'
       10 LET I = 4

@@ -74,61 +74,61 @@ module Basic
       out_expression
     end
 
-    def nextline(num)
-      "return nextline(#{num})"
+    def nextline(num,segment)
+      "return nextline(#{num},#{segment})"
     end
 
-    def x_REM(c,num)
-      [nextline(num)]
+    def x_REM(c,num,segment)
+      [nextline(num,segment)]
     end
 
-    def x_STOP(c,num)
+    def x_STOP(c,num,segment)
       ["raise StopException"]
     end
 
-    def x_CLS(c,num)
-      ['system("clear")',nextline(num)]
+    def x_CLS(c,num,segment)
+      ['system("clear")',nextline(num,segment)]
     end
 
-    def x_RETURN(c,num)
+    def x_RETURN(c,num,segment)
       ["return"]
     end
 
-    def x_GOSUB(c,num)
+    def x_GOSUB(c,num,segment)
       # GOSUB 200
       gnum = c.shift
-      ["self.gosub(#{gnum})",nextline(num)]
+      ["self.gosub(#{gnum})",nextline(num,segment)]
     end
 
-    def x_IF(c,num)
+    def x_IF(c,num,segment)
       exp = expression(c)
       c.shift # THEN
       [ "if (#{exp}) then",
-          self.compile(c,num),
+          self.compile(c,num,segment),
         "else",
-          "return nextline(#{num})",
+          "return nextline(#{num},#{segment})",
         "end"]
     end
 
-    def x_DIM(c,num)
+    def x_DIM(c,num,segment)
       var = varname(c.shift) 
       c.shift #(
       size = c.shift
       c.shift #)
-      [ "@#{var} = []\n",nextline(num) ]
+      [ "@#{var} = []\n",nextline(num,segment) ]
     end
 
-    def x_INPUT(c,num)
+    def x_INPUT(c,num,segment)
       var = varname(c.shift)
       if var =~ /_string/
         statements <<-END
           @#{var} = self.readline("? ")
-          return nextline(#{num})
+          return nextline(#{num},#{segment})
         END
       else
         statements <<-END
           @#{var} = self.readline("? ").to_f 
-          return nextline(#{num})
+          return nextline(#{num},#{segment})
         END
       end
     end
@@ -137,17 +137,17 @@ module Basic
       text.split(/\n/).map{ |line| line.strip }
     end
 
-    def x_LET(c,num)
+    def x_LET(c,num,segment)
       var = variable_expression(c.shift,c)
       c.shift # =
       value = expression(c)
       statements <<-END
         #{var} = (#{value})
-        return nextline(#{num})
+        return nextline(#{num},#{segment})
       END
     end
 
-    def x_FOR(c,num)
+    def x_FOR(c,num,segment)
       # FOR I = 1 TO 10
       var = varname(c.shift)
       c.shift # =
@@ -157,25 +157,25 @@ module Basic
       statements <<-END
         @#{var} = (#{start})
         @#{var}_end = (#{lend})
-        @#{var}_loop_line_no = nextline(#{num})
-        return nextline(#{num})
+        @#{var}_loop_line_no,@#{var}_segment = nextline(#{num},#{segment})
+        return nextline(#{num},#{segment})
       END
     end
 
-    def x_NEXT(c,num)
+    def x_NEXT(c,num,segment)
       # NEXT I
       var = varname(c.shift)
       statements <<-END
         @#{var} += 1
         if @#{var} > @#{var}_end
-          return nextline(#{num})
+          return nextline(#{num},#{segment})
         else
-          return @#{var}_loop_line_no
+          return [@#{var}_loop_line_no,@#{var}_segment]
         end
       END
     end
 
-    def x_PRINT(c,num)
+    def x_PRINT(c,num,segment)
       # PRINT "Hello"
       statements = []
       statements << "self.print \"\\n\"" if c.empty?   
@@ -193,19 +193,19 @@ module Basic
           end
         end
       end
-      statements << "return nextline(#{num})"
+      statements << "return nextline(#{num},#{segment})"
       statements
     end
 
-    def x_GOTO(c,num)
+    def x_GOTO(c,num,segment)
       # GOTO 20
       number = c.shift
-      ["return #{number}"]
+      ["return [#{number},0]"]
     end
 
-    def compile(c,number)
+    def compile(c,number,segment)
       command,*rest = c
-      self.send("x_#{command}".to_sym,rest,number).join("\n")
+      self.send("x_#{command}".to_sym,rest,number,segment).join("\n")
     end
   end
 end

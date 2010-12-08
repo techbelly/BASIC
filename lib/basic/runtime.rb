@@ -34,10 +34,10 @@ module Basic
       $stdout.flush
     end
         
-    def gosub(line_no)
+    def gosub(line_no,segment=0)
       while line_no
-        method_name = self.class.method_name(line_no)
-        line_no = self.send(method_name)
+        method_name = self.class.method_name(line_no,segment)
+        line_no,segment = self.send(method_name)
       end
     end
 
@@ -45,8 +45,8 @@ module Basic
       return Readline.readline(prompt)
     end
 
-    def nextline(num)
-      nextline = self.class.next(num)
+    def nextline(num,segment)
+      self.class.next(num,segment)
     end
   end
 end
