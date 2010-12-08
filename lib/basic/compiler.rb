@@ -154,10 +154,18 @@ module Basic
       start = expression(c)
       c.shift # TO
       lend = expression(c)
+      step = 1
+      if c.first == "STEP"
+        c.shift
+        step = expression(c)
+      end
       statements <<-END
+        step = (#{step})
+        raise "STEP ERROR 0" if step == 0
         @#{var} = (#{start})
-        @#{var}_end = (#{lend})
-        @#{var}_loop_line_no,@#{var}_segment = nextline(#{num},#{segment})
+        @P_#{var}_end = (#{lend})
+        @P_#{var}_step = step
+        @P_#{var}_loop_line_no,@P_#{var}_segment = nextline(#{num},#{segment})
         return nextline(#{num},#{segment})
       END
     end
@@ -166,11 +174,13 @@ module Basic
       # NEXT I
       var = varname(c.shift)
       statements <<-END
-        @#{var} += 1
-        if @#{var} > @#{var}_end
+        @#{var} += @P_#{var}_step
+        if @P_#{var}_step > 0 && @#{var} > @P_#{var}_end
           return nextline(#{num},#{segment})
+        elsif @P_#{var}_step < 0 && @#{var} < @P_#{var}_end
+            return nextline(#{num},#{segment})
         else
-          return [@#{var}_loop_line_no,@#{var}_segment]
+          return [@P_#{var}_loop_line_no,@P_#{var}_segment]
         end
       END
     end

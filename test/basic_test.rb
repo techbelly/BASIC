@@ -22,6 +22,35 @@ class BasicTest < Test::Unit::TestCase
     string.strip.gsub(/^\s+/, "")
   end
 
+  def test_negative_numbers
+    output = capture <<-'END'
+      10 LET A=-1
+      20 PRINT A
+      RUN
+    END
+    assert_match /-1/,output
+  end
+
+  def test_positive_step_in_FOR_loop
+    output = capture <<-'END'
+      10 FOR I=1 TO 4 STEP 2
+      20 PRINT I
+      30 NEXT I
+      RUN
+    END
+    assert_match /1\n3/, output
+  end
+
+  def test_negative_step_in_FOR_loop
+    output = capture <<-'END'
+      10 FOR I=4 TO 1 STEP -2
+      20 PRINT I
+      30 NEXT I
+      RUN
+    END
+    assert_match /4\n2/, output
+  end
+
   def test_should_count_up_in_FOR_loop
     output = capture <<-'END'
       10 FOR I=1 TO 4
