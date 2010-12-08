@@ -2,8 +2,6 @@ require "readline"
 require "basic/program"
 require "basic/compiler"
 
-$DEBUG=false
-
 class Array
   def split(delim)
     self.inject([[]]) do |c, e|

@@ -10,11 +10,10 @@ module Basic
 
     def expression(command)
       expression = []
-      command = command.dup
       while token = translate_token(command,expression)
         expression << token
       end
-      [command,expression.join("")]
+      expression.join("")
     end
 
     def basic_operator_to_ruby(op)
@@ -48,8 +47,31 @@ module Basic
       elsif BasicLib::FUNCTIONS.include?(token)
        "self.#{varname(token)}"
       else
-       "@"+varname(token)
+       variable_expression(token,command)
       end
+    end
+    
+    def variable_expression(token,command)
+      var = "@"+varname(token)
+       if command.first == "("
+        var << "["
+        out =  expression(index_expression(command))
+        var << out
+        var << "]"
+       end
+       var
+    end
+    
+    def index_expression(command)
+      out_expression = [command.shift]
+      left_brackets = 1
+      while left_brackets > 0 && !command.empty?
+        token = command.shift
+        out_expression << token
+        left_brackets += 1 if token == "("
+        left_brackets -= 1 if token == ")"
+      end
+      out_expression
     end
 
     def nextline(num)
@@ -79,13 +101,21 @@ module Basic
     end
 
     def x_IF(c,num)
-      c,exp = expression(c)
+      exp = expression(c)
       c.shift # THEN
       [ "if (#{exp}) then",
           self.compile(c,num),
         "else",
           "return nextline(#{num})",
         "end"]
+    end
+
+    def x_DIM(c,num)
+      var = varname(c.shift) 
+      c.shift #(
+      size = c.shift
+      c.shift #)
+      [ "@#{var} = []\n",nextline(num) ]
     end
 
     def x_INPUT(c,num)
@@ -108,11 +138,11 @@ module Basic
     end
 
     def x_LET(c,num)
-      var = varname(c.shift)
+      var = variable_expression(c.shift,c)
       c.shift # =
-      c,value = expression(c)
+      value = expression(c)
       statements <<-END
-        @#{var} = (#{value})
+        #{var} = (#{value})
         return nextline(#{num})
       END
     end
@@ -121,9 +151,9 @@ module Basic
       # FOR I = 1 TO 10
       var = varname(c.shift)
       c.shift # =
-      c,start = expression(c)
+      start = expression(c)
       c.shift # TO
-      c,lend = expression(c)
+      lend = expression(c)
       statements <<-END
         @#{var} = (#{start})
         @#{var}_end = (#{lend})
@@ -150,7 +180,7 @@ module Basic
       statements = []
       statements << "self.print \"\\n\"" if c.empty?   
       while not c.empty?
-        c,out = expression(c)
+        out = expression(c)
         statements << "self.print(#{out})"
         if c.empty?
           statements << "self.print \"\\n\""

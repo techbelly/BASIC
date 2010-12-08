@@ -76,6 +76,18 @@ class BasicTest < Test::Unit::TestCase
     assert_match /LESS THAN 5/, output
   end
   
+  def test_dim_defines_an_array
+    $DE
+    output = capture <<-'END'
+      10 DIM A(8)
+      20 LET B = 1
+      30 LET A(B) = 2
+      40 PRINT "RESULT ";A(B)
+      RUN
+    END
+    assert_match /RESULT 2/, output
+  end
+  
   def test_not_equal_to
     output = capture <<-'END'
       10 LET I = 4
