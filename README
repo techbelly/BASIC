@@ -14,5 +14,7 @@ Or if you prefer
 
  READY
 
- > LOAD "battle/robotmissile.bas"
+ > LOAD "examples/battle/robotmissile.bas"
  > RUN
+
+Requires 'termios' to be installed.
