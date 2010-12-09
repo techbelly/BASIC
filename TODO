@@ -4,9 +4,6 @@
   
 • Array bounds checking and other error handling.
 
-• ELSE in IF statement
-  10 IF A>B THEN GOTO 50 ELSE GOTO 20
-
 • Implement the semantics of the PRINT statement TAB() and SPC()
 
 I think that's it for a simple interpreter. Much refactoring and fun should follow.

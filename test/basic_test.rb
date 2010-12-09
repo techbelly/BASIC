@@ -80,6 +80,17 @@ class BasicTest < Test::Unit::TestCase
     assert_match /GREATER THAN 3/, output
   end
 
+  def test_if_else
+    output = capture <<-'END'
+      10 LET I = 4
+      20 IF I>3 THEN PRINT "GREATER THAN 3" ELSE PRINT "NOT GREATER THAN 3"
+      25 IF I>4 THEN PRINT "GREATER THAN 4" ELSE PRINT "NOT GREATER THAN 4"
+      30 IF I>5 THEN PRINT "GREATER THAN 5" ELSE PRINT "NOT GREATER THAN 5"
+      RUN
+    END
+    assert_equal ["GREATER THAN 3","NOT GREATER THAN 4","NOT GREATER THAN 5"].join("\n"), output
+  end
+
   def test_less_than_or_equal_to
     output = capture <<-'END'
       10 LET I = 4

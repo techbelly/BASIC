@@ -80,8 +80,8 @@ module Basic
 
     def self.simple_statement(name,&body)
       define_method("x_#{name}") do |c,num,seg|
-          commands = yield c
-          [commands,nextline(num,seg)].join("\n")
+        commands = yield c
+        [commands,nextline(num,seg)].join("\n")
       end
     end
     
@@ -125,7 +125,7 @@ module Basic
     simple_statement(:PRINT) do |c|
       statements = []
       statements << "self.print \"\\n\"" if c.empty?   
-      while not c.empty?
+      while not c.empty? && ! BasicLib::EXPRESSION_TERMINATORS.include?(c.first)
         out = expression(c)
         statements << "self.print(#{out})"
         if c.empty?
@@ -188,11 +188,18 @@ module Basic
     def x_IF(c,num,segment)
       exp = expression(c)
       c.shift # THEN
+      poscommand,negcommand = c.split("ELSE")
+      positive = self.compile(poscommand,num,segment)
+      if negcommand
+        negative = self.compile(negcommand,num,segment)
+      else
+        negative = "nextline(#{num},#{segment})"
+      end
       <<-END
         if (#{exp}) 
-          #{self.compile(c,num,segment)}
+          #{positive}
         else
-          nextline(#{num},#{segment})
+          #{negative}
         end
       END
     end
