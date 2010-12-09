@@ -77,14 +77,14 @@ module Basic
     def self.remove(num)
       @lines[num].each_with_index do |seg,i|
          remove_method(method_name(num,i))
-         @generated.delete("#{num}_#{seg}")
+         @generated.delete([num,seg])
       end
       @lines.delete(num)
     end
 
     def self.define(num,seg,t,s)
       name = method_name(num,seg)
-      method = "def #{name}\n#{s}\nend\n"
+      method = ["def #{name}",s,"end"].join("\n")
       begin
         eval(method)
         @generated[[num,seg]] = method

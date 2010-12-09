@@ -37,7 +37,7 @@ module Basic
     end
     
     def inkey(wait_time)
-      char = getbyte(wait_time=100)
+      char = getbyte(wait_time)
       char ? char : -1
     end
     
