@@ -103,7 +103,7 @@ module Basic
     end
 
     simple_statement(:GOSUB) do |c|
-      gnum = c.shift
+      gnum = expression(c)
       "self.gosub(#{gnum})"
     end
 
