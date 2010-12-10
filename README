@@ -17,4 +17,12 @@ Or if you prefer
  > LOAD "examples/battle/robotmissile.bas"
  > RUN
 
+examples/battle has programs from Usborne's Computer Battlegames, http://www.computinghistory.org.uk/cgi-bin/sitewise.pl?act=det&p=9739
+
+examples/space programs from Usborne's Computer Spacegames. http://www.computinghistory.org.uk/cgi-bin/sitewise.pl?act=det&p=9740
+
+examples/creepy programs from Usborne's Creepy Computer Games. 
+
+Knock yourselves out.
+
 Requires 'termios' to be installed.
