@@ -109,10 +109,14 @@ module Basic
       end
     end
     
+    def stringvar?(varn)
+      varn =~ /\$$/
+    end
+    
     simple_statement(:INPUT) do |c|
       varn = c.shift
       var = varname(varn)
-      if var =~ /\$/
+      if stringvar?(varn)
           "#{var} = self.readline(\"? \")"
       else
           "#{var} = self.readline(\"? \").to_f"
@@ -133,7 +137,8 @@ module Basic
     end
 
     simple_statement(:DIM) do |c|
-      var = varname(c.shift) 
+      varn = c.shift
+      var = varname(varn) 
       expect(c,"(") #(
       sizes = []
       begin
@@ -141,7 +146,11 @@ module Basic
         sizes << c.shift
         next_token = c.shift # ) or ,
       end while next_token == ","
-      "#{var} = self.create_array([#{sizes.join(",")}])"
+      if stringvar?(varn)
+        "#{var} = self.create_string_array([#{sizes.join(",")}])"
+      else
+        "#{var} = self.create_array([#{sizes.join(",")}])"
+      end
     end
     
     simple_statement(:LET) do |c|

@@ -135,6 +135,28 @@ class BasicTest < Test::Unit::TestCase
     assert_match /RESULT 2/, output
   end
   
+  def test_multidimensional_string_arrays
+    output = capture <<-'END'
+    10 DIM A$(3,3)
+    20 LET A$(1,1) = "A"
+    30 LET A$(1,2) = "B"
+    40 LET A$(2,2) = "C"
+    50 FOR I = 0 TO 2
+    60 FOR J = 0 TO 2
+    65 IF A$(I,J) = "" THEN PRINT "x"; ELSE PRINT A$(I,J);
+    80 NEXT J
+    85 PRINT
+    90 NEXT I
+    RUN
+  END
+  result = <<END
+xxx
+xAB
+xxC
+END
+    assert_equal result.chomp, output 
+  end
+  
   def test_multidimensional_number_arrays
     output = capture <<-'END'
       10 DIM A(3,3)

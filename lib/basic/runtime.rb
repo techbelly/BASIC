@@ -33,6 +33,10 @@ module Basic
       return Hash.new(0)
     end
     
+    def create_string_array(dimensions)
+      return Hash.new("")
+    end
+    
     def print(string)
       $stdout.print string
       $stdout.flush
