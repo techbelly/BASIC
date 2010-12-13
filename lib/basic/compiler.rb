@@ -58,10 +58,13 @@ module Basic
     def variable_expression(token,command)
       var = varname(token)
        if command.first == "("
-        var << "["
-        out =  expression(index_expression(command))
-        var << out
-        var << "]"
+        var << "[["
+        dimensions = []
+        begin
+          dimensions << expression(index_expression(command))
+        end while command.first == "("
+        var << dimensions.join(",")
+        var << "]]"
        end
        var
     end
@@ -71,6 +74,11 @@ module Basic
       left_brackets = 1
       while left_brackets > 0 && !command.empty?
         token = command.shift
+        if left_brackets == 1 && token == ","
+          out_expression << ")"
+          command.unshift("(")
+          break
+        end
         out_expression << token
         left_brackets += 1 if token == "("
         left_brackets -= 1 if token == ")"
@@ -102,8 +110,9 @@ module Basic
     end
     
     simple_statement(:INPUT) do |c|
-      var = varname(c.shift)
-      if var =~ /_string/
+      varn = c.shift
+      var = varname(varn)
+      if var =~ /\$/
           "#{var} = self.readline(\"? \")"
       else
           "#{var} = self.readline(\"? \").to_f"
@@ -132,7 +141,6 @@ module Basic
         sizes << c.shift
         next_token = c.shift # ) or ,
       end while next_token == ","
-      puts sizes
       "#{var} = self.create_array([#{sizes.join(",")}])"
     end
     
