@@ -1,6 +1,4 @@
-• Multidimensional arrays:
-  10 DIM A(10,20)
-  20 A(1,2) = 4
+• DATA and READ
   
 • Array bounds checking and other error handling.
 

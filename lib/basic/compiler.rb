@@ -155,7 +155,7 @@ module Basic
     
     simple_statement(:LET) do |c|
       var = variable_expression(c.shift,c)
-      c.shift # =
+      expect(c,"=")
       value = expression(c)
       "#{var} = (#{value})"
     end
