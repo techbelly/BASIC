@@ -7,6 +7,7 @@ module Basic
 
   class Program
     def self.run()
+      @env = {}
       line_no = @lines.keys.min
       return unless line_no
       begin
@@ -14,6 +15,10 @@ module Basic
         b.gosub(line_no)
       rescue StopException
       end
+    end
+
+    def self.env
+      @env
     end
 
     def self.list()

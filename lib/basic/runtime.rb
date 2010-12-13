@@ -45,6 +45,10 @@ module Basic
       return Readline.readline(prompt)
     end
 
+    def env
+      self.class.env
+    end
+
     def nextline(num,segment)
       self.class.next(num,segment)
     end

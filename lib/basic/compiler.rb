@@ -5,6 +5,10 @@ module Basic
     extend self
 
     def varname(string)
+      "env[\"#{string}\"]"
+    end
+
+    def funcname(string)
       string.downcase.gsub("$","_string")
     end
 
@@ -45,14 +49,14 @@ module Basic
       elsif token[0..0] == "\""
        token
       elsif BasicLib::FUNCTIONS.include?(token)
-       "self.#{varname(token)}"
+       "self.#{funcname(token)}"
       else
        variable_expression(token,command)
       end
     end
     
     def variable_expression(token,command)
-      var = "@"+varname(token)
+      var = varname(token)
        if command.first == "("
         var << "["
         out =  expression(index_expression(command))
@@ -88,9 +92,9 @@ module Basic
     simple_statement(:INPUT) do |c|
       var = varname(c.shift)
       if var =~ /_string/
-          "@#{var} = self.readline(\"? \")"
+          "#{var} = self.readline(\"? \")"
       else
-          "@#{var} = self.readline(\"? \").to_f"
+          "#{var} = self.readline(\"? \").to_f"
       end
     end
 
@@ -112,7 +116,7 @@ module Basic
       c.shift #(
       size = c.shift
       c.shift #)
-      "@#{var} = []"
+      "#{var} = []"
     end
     
     simple_statement(:LET) do |c|
@@ -143,7 +147,12 @@ module Basic
     end
 
     def x_FOR(c,num,segment)
-      var = varname(c.shift)
+      varn = c.shift
+      var = varname(varn)
+      endvar = varname(varn+"_end")
+      stepvar = varname(varn+"_step")
+      linevar = varname(varn+"_loop_line")
+      segvar = varname(varn+"_segment")
       c.shift # =
       start = expression(c)
       c.shift # TO
@@ -156,23 +165,28 @@ module Basic
       <<-END
         step = (#{step})
         raise "STEP ERROR 0" if step == 0
-        @#{var} = (#{start})
-        @_#{var}_end = (#{lend})
-        @_#{var}_step = step
-        @_#{var}_loop_line_no,@_#{var}_segment = nextline(#{num},#{segment})
+        #{var} = (#{start})
+        #{endvar} = (#{lend})
+        #{stepvar} = step
+        #{linevar},#{segvar} = nextline(#{num},#{segment})
       END
     end
 
     def x_NEXT(c,num,segment)
-      var = varname(c.shift)
+      varn = c.shift
+      var = varname(varn)
+      endvar = varname(varn+"_end")
+      stepvar = varname(varn+"_step")
+      linevar = varname(varn+"_loop_line")
+      segvar = varname(varn+"_segment")
       <<-END
-        @#{var} += @_#{var}_step
-        if @_#{var}_step > 0 && @#{var} > @_#{var}_end
+        #{var} += #{stepvar}
+        if #{stepvar} > 0 && #{var} > #{endvar}
           nextline(#{num},#{segment})
-        elsif @_#{var}_step < 0 && @#{var} < @_#{var}_end
+        elsif #{stepvar} < 0 && #{var} < #{endvar}
           nextline(#{num},#{segment})
         else
-          [@_#{var}_loop_line_no,@_#{var}_segment]
+          [#{linevar},#{segvar}]
         end
       END
     end
