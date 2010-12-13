@@ -135,6 +135,51 @@ class BasicTest < Test::Unit::TestCase
     assert_match /RESULT 2/, output
   end
   
+  def test_multidimensional_number_arrays
+    output = capture <<-'END'
+      10 DIM A(3,3)
+      20 LET A(1,1) = 3
+      30 LET A(1,2) = 3
+      40 LET A(2,2) = 3
+      50 FOR I = 0 TO 2
+      60 FOR J = 0 TO 2
+      70 PRINT A(I,J);
+      80 NEXT J
+      85 PRINT
+      90 NEXT I
+      RUN
+    END
+    result = <<END
+000
+033
+003
+END
+    assert_equal result.chomp, output
+  end
+  
+  def test_assignment_to_multidimensional_number_arrays
+    output = capture <<-'END'
+      10 DIM A(3,3)
+      20 LET A(1,1) = 3
+      30 LET A(1,2) = 3
+      40 LET A(2,2) = 3
+      45 LET A(2,2) = A(2,2) + 1
+      50 FOR I = 0 TO 2
+      60 FOR J = 0 TO 2
+      70 PRINT A(I,J);
+      80 NEXT J
+      85 PRINT
+      90 NEXT I
+      RUN
+    END
+    result = <<END
+000
+033
+004
+END
+    assert_equal result.chomp, output
+  end
+  
   def test_not_equal_to
     output = capture <<-'END'
       10 LET I = 4

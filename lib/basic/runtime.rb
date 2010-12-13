@@ -30,7 +30,7 @@ module Basic
     end
     
     def create_array(dimensions)
-      return {}
+      return Hash.new(0)
     end
     
     def print(string)
