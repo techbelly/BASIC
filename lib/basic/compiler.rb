@@ -78,6 +78,18 @@ module Basic
       out_expression
     end
 
+    def expect(c,expected)
+      value = c.shift
+      if value != expected
+        if value.nil? || value == ""
+          puts "Expected #{expected}"
+        else
+          puts "Expected #{expected}, got #{value}"
+        end
+        raise SyntaxError.new("Expected #{expected}, got #{value}")
+      end
+    end
+
     def nextline(num,segment)
       "nextline(#{num},#{segment})"
     end
@@ -113,10 +125,15 @@ module Basic
 
     simple_statement(:DIM) do |c|
       var = varname(c.shift) 
-      c.shift #(
-      size = c.shift
-      c.shift #)
-      "#{var} = []"
+      expect(c,"(") #(
+      sizes = []
+      begin
+        # TODO: should we allow an expression here?
+        sizes << c.shift
+        next_token = c.shift # ) or ,
+      end while next_token == ","
+      puts sizes
+      "#{var} = self.create_array([#{sizes.join(",")}])"
     end
     
     simple_statement(:LET) do |c|
@@ -153,9 +170,9 @@ module Basic
       stepvar = varname(varn+"_step")
       linevar = varname(varn+"_loop_line")
       segvar = varname(varn+"_segment")
-      c.shift # =
+      expect(c,"=")
       start = expression(c)
-      c.shift # TO
+      expect(c,"TO")
       lend = expression(c)
       step = 1
       if c.first == "STEP"
@@ -201,7 +218,7 @@ module Basic
 
     def x_IF(c,num,segment)
       exp = expression(c)
-      c.shift # THEN
+      expect(c,"THEN") # THEN
       poscommand,negcommand = c.split("ELSE")
       positive = self.compile(poscommand,num,segment)
       if negcommand

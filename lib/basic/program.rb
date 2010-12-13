@@ -90,15 +90,10 @@ module Basic
     def self.define(num,seg,t,s)
       name = method_name(num,seg)
       method = ["def #{name}",s,"end"].join("\n")
-      begin
-        eval(method)
-        @generated[[num,seg]] = method
-        @lines[num] = [] unless @lines[num]
-        @lines[num][seg] = t
-      rescue SyntaxError
-        puts "SYNTAX ERROR in LINE #{num}"
-        puts t.join(" ")
-      end
+      eval(method)
+      @generated[[num,seg]] = method
+      @lines[num] = [] unless @lines[num]
+      @lines[num][seg] = t
     end
 
     include BasicLib

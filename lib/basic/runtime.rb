@@ -29,6 +29,10 @@ module Basic
       end
     end
     
+    def create_array(dimensions)
+      return []
+    end
+    
     def print(string)
       $stdout.print string
       $stdout.flush

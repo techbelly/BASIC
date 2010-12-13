@@ -30,10 +30,15 @@ end
 module Basic
   module Interpreter
     def define(number,tokens)
-      commands = tokens.split(':')
-      commands.each_with_index do |c,segment|
-        method_body = Compiler.compile(c,number,segment)
-        Program.define(number,segment,c,method_body)
+      begin
+        commands = tokens.split(':')
+        commands.each_with_index do |c,segment|
+          method_body = Compiler.compile(c,number,segment)
+          Program.define(number,segment,c,method_body)
+        end
+      rescue SyntaxError
+        puts "SYNTAX ERROR in LINE #{number}"
+        puts tokens.join(" ")
       end
     end
 
