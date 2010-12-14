@@ -2,9 +2,7 @@ require "termios"
 
 module Basic
   module Runtime
-    
-    extend self
-    
+        
     # This is based on some code that I found in the 
     # highrise library: http://highline.rubyforge.org/
     def getbyte(wait_time=nil)      

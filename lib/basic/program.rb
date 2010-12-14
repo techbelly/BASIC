@@ -5,16 +5,24 @@ module Basic
   class StopException < Exception
   end
 
+  class RerunException < Exception
+  end
+
   class Program
     def self.run()
-      @env = {}
-      line_no = @lines.keys.min
-      return unless line_no
       begin
-        b = self.new
-        b.gosub(line_no)
-      rescue StopException
-      end
+        rerun = false
+        @env = {}
+        line_no = @lines.keys.min
+        return unless line_no
+        begin
+          b = self.new
+          b.gosub(line_no)
+        rescue StopException
+        rescue RerunException
+          rerun = true
+        end
+      end while rerun
     end
 
     def self.env

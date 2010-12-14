@@ -260,13 +260,17 @@ module Basic
       "raise StopException"
     end
     
+    def x_RUN(c,num,segment)
+       "raise RerunException"
+    end
+    
     def x_RETURN(c,num,segment)
       "return"
     end
 
     def x_IF(c,num,segment)
       exp = expression(c)
-      expect(c,"THEN") # THEN
+      expect(c,"THEN") 
       poscommand,negcommand = c.split("ELSE")
       positive = self.compile(poscommand,num,segment)
       if negcommand
