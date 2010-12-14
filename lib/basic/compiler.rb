@@ -86,9 +86,9 @@ module Basic
       out_expression
     end
 
-    def expect(c,expected)
+    def expect(c,*expected)
       value = c.shift
-      if value != expected
+      unless expected.include?(value)
         if value.nil? || value == ""
           puts "Expected #{expected}"
         else
@@ -96,6 +96,7 @@ module Basic
         end
         raise SyntaxError.new("Expected #{expected}, got #{value}")
       end
+      value
     end
 
     def nextline(num,segment)
@@ -139,12 +140,12 @@ module Basic
     simple_statement(:DIM) do |c|
       varn = c.shift
       var = varname(varn) 
-      expect(c,"(") #(
+      expect(c,"(") 
       sizes = []
       begin
         # TODO: should we allow an expression here?
         sizes << c.shift
-        next_token = c.shift # ) or ,
+        next_token = expect(c,")",",")
       end while next_token == ","
       if stringvar?(varn)
         "#{var} = self.create_string_array([#{sizes.join(",")}])"
@@ -160,18 +161,48 @@ module Basic
       "#{var} = (#{value})"
     end
 
+    def print_tab(c)
+      expect(c,"TAB")
+      tabnum = expression(index_expression(c))
+      output = <<-END
+        tab = (#{tabnum})
+        if (tab>0)
+          if (tab<self.cols) 
+            self.print_newline
+            self.print " "*(tab % self.maxcol)
+          else
+            self.print " "*((tab-self.cols) % self.maxcol)
+          end
+        end
+      END
+    end
+
+    def print_spc(c)
+      expect(c,"SPC")
+      spcnum = expression(index_expression(c))
+      output = <<-END
+          self.print " "*((#{spcnum})% self.maxcol)
+      END
+    end
+
     simple_statement(:PRINT) do |c|
       statements = []
-      statements << "self.print \"\\n\"" if c.empty?   
+      statements << "self.print_newline" if c.empty?   
       while not c.empty? && ! BasicLib::EXPRESSION_TERMINATORS.include?(c.first)
-        out = expression(c)
-        statements << "self.print(#{out})"
-        if c.empty?
-          statements << "self.print \"\\n\""
+        if c.first == "TAB"
+          statements << print_tab(c)
+        elsif c.first == "SPC"
+          statements << print_spc(c)
         else
-          delim = c.shift
+          out = expression(c)
+          statements << "self.print(#{out})"
+        end
+        if c.empty?
+          statements << "self.print_newline"
+        else
+          delim = expect(c,",",";")
           if delim == ","
-            statements << "self.print \"\\t\""
+            statements << "self.print_tab"
           elsif delim == ";"
             break if c.empty?
           end

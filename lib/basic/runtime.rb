@@ -36,9 +36,38 @@ module Basic
     def create_string_array(dimensions)
       return Hash.new("")
     end
+
+
+    def cols
+      @cols || 0
+    end
+
+    def print_tab
+      print("\t")
+    end
     
+    def print_newline
+      print("\n")
+    end
+
+    def maxcol
+      80
+    end
+
     def print(string)
-      $stdout.print string
+      @cols ||= 0
+      string.to_s.each_char do |c|
+        $stdout.print c
+        if c == "\n"
+          @cols = 0
+        else
+          @cols = @cols + 1
+        end
+        if @cols > maxcol
+          $stdout.print "\n"
+          @cols = 0
+        end
+      end
       $stdout.flush
     end
         
