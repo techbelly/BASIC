@@ -27,6 +27,22 @@ class Fixnum
   end
 end
 
+class FalseClass
+  define_method :"!" do
+    true
+  end
+  
+  define_method :"||" do |other| 
+    self || other
+  end
+end
+
+class TrueClass
+  define_method :"!" do
+    false
+  end
+end
+
 module Basic
   module Interpreter
     def define(number,tokens)
@@ -36,8 +52,9 @@ module Basic
           method_body = Compiler.compile(c,number,segment)
           Program.define(number,segment,c,method_body)
         end
-      rescue SyntaxError
+      rescue SyntaxError => e
         puts "SYNTAX ERROR in LINE #{number}"
+        puts e
         puts tokens.join(" ")
       end
     end
@@ -117,8 +134,14 @@ module Basic
           else
             read(rest,output+[">"],"")
         end
-         
-      elsif "+-*/=():;,".include?(first)
+      elsif "-".include?(first)
+        if token.empty?
+          read(rest,output,token+first)
+        else
+          output.push(token)
+          read(rest, output + [first], "")
+        end
+      elsif "+*/=():;,".include?(first)
         output.push(token) unless token.empty?
         read(rest, output + [first], "")
 

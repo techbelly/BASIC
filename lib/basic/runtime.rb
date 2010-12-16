@@ -27,14 +27,90 @@ module Basic
       end
     end
     
-    def create_array(dimensions)
-      return Hash.new(0)
+    class BasicArray
+      def initialize(extents,default)
+        @hash = Hash.new(default)
+        @extents = extents
+      end
+              
+      def [](key)
+        @hash[key]
+      end
+      
+      def []=(key,value)
+        @hash[key]= value
+      end
+      
+      def dimensions
+        @extents.size
+      end
     end
     
-    def create_string_array(dimensions)
-      return Hash.new("")
+    def create_array(extents)
+      return BasicArray.new(extents,0)
+    end
+    
+    def create_string_array(extents)
+      return BasicArray.new(extents,"")
     end
 
+    def funcname(string)
+      string.downcase.gsub("$","_string")
+    end
+    
+    def basic_operator_to_ruby(op)
+      case op
+      when "="
+        "=="
+      when "<>"
+        "!="
+      when "AND"
+        "&&"
+      when "OR"
+        "||"
+      else
+        op.downcase
+      end
+    end
+
+    def evaluate(tokens)
+      stack = []
+      tokens.each do |type,token|
+        case type
+          when :operator
+            operator = basic_operator_to_ruby(token)
+            if operator == "!="
+              addend, augend = stack.pop, stack.pop
+              equal =  augend.send(:"==",addend)
+              stack.push !equal
+            else
+              addend, augend = stack.pop, stack.pop
+              stack.push augend.send(operator.to_sym,addend)
+            end
+          when :function
+            funcname = funcname(token)
+            arity = method(funcname).arity
+            args = []
+            arity.times do
+              args.unshift stack.pop
+            end
+            stack.push self.send(funcname.to_sym,*args)
+          when :array_ref
+            array = self.env[token]
+            dimensions = array.dimensions
+            args = []
+            dimensions.times do
+              args.unshift stack.pop
+            end
+            stack.push array[args]
+          when :variable
+            stack.push self.env[token]
+          else
+            stack.push token
+        end
+      end
+      stack.pop
+    end
 
     def cols
       @cols || 0

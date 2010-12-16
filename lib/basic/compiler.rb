@@ -8,52 +8,92 @@ module Basic
       "env[\"#{string}\"]"
     end
 
-    def funcname(string)
-      string.downcase.gsub("$","_string")
+    def pop_back_to_left_bracket(stack,output)
+      while !stack.empty?
+        type,token = stack.pop
+        if type == :left_bracket
+          break
+        elsif stack.empty?
+          raise SyntaxError "Mismatched parentheses"
+        else
+          output << [type,token]
+        end
+      end
+    end
+
+    def output_any_functions(stack,output)
+      type,top = stack[-1]
+      if type == :function || type == :variable || type == :array_ref
+        output << stack.pop
+      end
+    end
+
+    def output_higher_precedence_operators(stack,token,output)
+      type,top = stack[-1]
+      while type == :operator
+        if BasicLib::OPERATORS.index(top) > BasicLib::OPERATORS.index(token)
+          output << stack.pop
+          type,top = stack[-1]
+        else
+          break
+        end
+      end
+    end
+
+    def variable_name?(token)
+      token =~ /^[A-Z]+\$?$/
+    end
+
+    def to_reverse_polish(tokens)
+      output = []
+      stack = []
+      tokens.each_with_index do |token,i|
+        case 
+          when token == ")"
+            pop_back_to_left_bracket(stack,output)
+            output_any_functions(stack,output)
+          when token == ","
+            pop_back_to_left_bracket(stack,output)
+            stack.push [:left_bracket,"("]
+          when token == "(" 
+            stack.push [:left_bracket,token]
+          when BasicLib::FUNCTIONS.include?(token)
+            stack.push [:function,token]
+          when BasicLib::OPERATORS.include?(token)
+             output_higher_precedence_operators(stack,token,output)
+             stack.push [:operator,token]
+          when variable_name?(token) && tokens[i+1] == "("
+            stack.push [:array_ref,token]
+          when variable_name?(token) 
+            output << [:variable,token]
+          
+          else
+            output << [:literal,eval(token)]
+        end
+      end
+
+      output << stack.pop while !stack.empty?
+
+      output
     end
 
     def expression(command)
-      expression = []
-      while token = translate_token(command,expression)
-        expression << token
+      exp = []
+      while !command.empty?
+        token = command.first
+        if BasicLib::EXPRESSION_TERMINATORS.include?(token)
+          break
+        else
+          exp << command.shift
+        end
       end
-      expression.join("")
-    end
-
-    def basic_operator_to_ruby(op)
-      case op
-      when "="
-        "=="
-      when "<>"
-        "!="
-      when "AND"
-        "&&"
-      when "OR"
-        "||"
+      if !exp.empty?
+        return "self.evaluate(#{to_reverse_polish(exp).inspect})"
       else
-        op.downcase
+        return ""
       end
     end
 
-    def translate_token(command,expression)
-      return nil if command.empty?
-      token = command.shift
-
-      if BasicLib::OPERATORS.include?(token)
-       basic_operator_to_ruby(token)
-      elsif BasicLib::EXPRESSION_TERMINATORS.include?(token)
-       command.unshift(token)
-       nil
-      elsif token =~ /^\d+(\.\d+)?$/
-       token
-      elsif token[0..0] == "\""
-       token
-      elsif BasicLib::FUNCTIONS.include?(token)
-       "self.#{funcname(token)}"
-      else
-       variable_expression(token,command)
-      end
-    end
     
     def variable_expression(token,command)
       var = varname(token)
