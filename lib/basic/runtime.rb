@@ -47,11 +47,11 @@ module Basic
     end
     
     def create_array(extents)
-      return BasicArray.new(extents,0)
+      return BasicArray.new(extents,Value.new(0))
     end
     
     def create_string_array(extents)
-      return BasicArray.new(extents,"")
+      return BasicArray.new(extents,Value.new(""))
     end
 
     def funcname(string)
@@ -59,18 +59,99 @@ module Basic
     end
     
     def basic_operator_to_ruby(op)
-      case op
-      when "="
-        "=="
-      when "<>"
-        "!="
-      when "AND"
-        "&&"
-      when "OR"
-        "||"
-      else
-        op.downcase
+      {
+        "+" =>   "plus",
+        "-" =>   "minus",
+        "*" =>   "times",
+        "/" =>   "divided_by",
+        "OR" =>  "logic_or",
+        "AND" => "logic_and", 
+        "=" =>   "equal",
+        "<>" =>  "not_equal",
+        "<=" =>  "lte", 
+        ">=" =>  "gte",
+        "<" =>   "lt",
+        ">" =>   "gt"
+      }[op]
+    end
+
+    class Value
+      def initialize(value)
+        @value = value
       end
+      
+      def value
+        @value
+      end
+      
+      def plus(other)
+        @value+other.value
+      end
+      
+      def minus(other)
+        @value-other.value
+      end
+      
+      def times(other)
+        @value*other.value
+      end
+      
+      def divided_by(other)
+        @value/other.value
+      end
+      
+      def wrap(value)
+        value ? 1 : 0
+      end
+      
+      def to_b
+        !(@value == 0)
+      end
+      
+      def logic_or(other)
+        wrap(self.to_b || other.to_b)
+      end
+      
+      def logic_and(other)
+        wrap(self.to_b && other.to_b)
+      end
+      
+      def equal(other)
+        wrap(@value == other.value)
+      end
+      
+      def not_equal(other)
+        wrap(@value != other.value)
+      end
+      
+      def lte(other)
+        wrap(@value <= other.value)
+      end
+      
+      def gte(other)
+        wrap(@value >= other.value)
+      end
+      
+      def lt(other)
+        wrap(@value < other.value)
+      end
+      
+      def gt(other)
+        wrap(@value > other.value)
+      end
+    
+      def to_s
+        @value.to_s
+      end
+      
+      def inspect
+        to_s
+      end
+      
+      def hash
+        @value.hash
+      end
+    
     end
 
     def evaluate(tokens)
@@ -79,14 +160,8 @@ module Basic
         case type
           when :operator
             operator = basic_operator_to_ruby(token)
-            if operator == "!="
-              addend, augend = stack.pop, stack.pop
-              equal =  augend.send(:"==",addend)
-              stack.push !equal
-            else
-              addend, augend = stack.pop, stack.pop
-              stack.push augend.send(operator.to_sym,addend)
-            end
+            addend, augend = stack.pop, stack.pop
+            stack.push Value.new(augend.send(operator.to_sym,addend))
           when :function
             funcname = funcname(token)
             arity = method(funcname).arity
@@ -94,7 +169,7 @@ module Basic
             arity.times do
               args.unshift stack.pop
             end
-            stack.push self.send(funcname.to_sym,*args)
+            stack.push Value.new(self.send(funcname.to_sym,*args.map{|a| a.value}))
           when :array_ref
             array = self.env[token]
             dimensions = array.dimensions
@@ -102,11 +177,11 @@ module Basic
             dimensions.times do
               args.unshift stack.pop
             end
-            stack.push array[args]
+            stack.push array[args.map {|s| s.value}]
           when :variable
             stack.push self.env[token]
           else
-            stack.push token
+            stack.push Value.new(token)
         end
       end
       stack.pop

@@ -1,82 +1,15 @@
 require "basic/basiclib"
+require "basic/expression_parser"
 
 module Basic
   module Compiler
-    extend self
 
     def varname(string)
       "env[\"#{string}\"]"
     end
 
-    def pop_back_to_left_bracket(stack,output)
-      while !stack.empty?
-        type,token = stack.pop
-        if type == :left_bracket
-          break
-        elsif stack.empty?
-          raise SyntaxError "Mismatched parentheses"
-        else
-          output << [type,token]
-        end
-      end
-    end
-
-    def output_any_functions(stack,output)
-      type,top = stack[-1]
-      if type == :function || type == :variable || type == :array_ref
-        output << stack.pop
-      end
-    end
-
-    def output_higher_precedence_operators(stack,token,output)
-      type,top = stack[-1]
-      while type == :operator
-        if BasicLib::OPERATORS.index(top) > BasicLib::OPERATORS.index(token)
-          output << stack.pop
-          type,top = stack[-1]
-        else
-          break
-        end
-      end
-    end
-
-    def variable_name?(token)
-      token =~ /^[A-Z]+\$?$/
-    end
-
-    def to_reverse_polish(tokens)
-      output = []
-      stack = []
-      tokens.each_with_index do |token,i|
-        case 
-          when token == ")"
-            pop_back_to_left_bracket(stack,output)
-            output_any_functions(stack,output)
-          when token == ","
-            pop_back_to_left_bracket(stack,output)
-            stack.push [:left_bracket,"("]
-          when token == "(" 
-            stack.push [:left_bracket,token]
-          when BasicLib::FUNCTIONS.include?(token)
-            stack.push [:function,token]
-          when BasicLib::OPERATORS.include?(token)
-             output_higher_precedence_operators(stack,token,output)
-             stack.push [:operator,token]
-          when variable_name?(token) && tokens[i+1] == "("
-            stack.push [:array_ref,token]
-          when variable_name?(token) 
-            output << [:variable,token]
-          
-          else
-            output << [:literal,eval(token)]
-        end
-      end
-
-      output << stack.pop while !stack.empty?
-
-      output
-    end
-
+    include ExpressionParser
+    
     def expression(command)
       exp = []
       while !command.empty?
@@ -93,7 +26,6 @@ module Basic
         return ""
       end
     end
-
     
     def variable_expression(token,command)
       var = varname(token)
@@ -103,7 +35,7 @@ module Basic
         begin
           dimensions << expression(index_expression(command))
         end while command.first == "("
-        var << dimensions.join(",")
+        var << dimensions.map {|m| m+".value"}.join(",")
         var << "]]"
        end
        var
@@ -262,7 +194,7 @@ module Basic
       start = expression(c)
       expect(c,"TO")
       lend = expression(c)
-      step = 1
+      step = expression(["1"])
       if c.first == "STEP"
         c.shift
         step = expression(c)
@@ -285,10 +217,11 @@ module Basic
       linevar = varname(varn+"_loop_line")
       segvar = varname(varn+"_segment")
       <<-END
-        #{var} += #{stepvar}
-        if #{stepvar} > 0 && #{var} > #{endvar}
+        #{var} = Value.new(#{var}.plus(#{stepvar}))
+        value = #{var}.value 
+        if #{stepvar}.value > 0 && value > #{endvar}.value
           nextline(#{num},#{segment})
-        elsif #{stepvar} < 0 && #{var} < #{endvar}
+        elsif #{stepvar}.value < 0 && value < #{endvar}.value
           nextline(#{num},#{segment})
         else
           [#{linevar},#{segvar}]
@@ -319,7 +252,7 @@ module Basic
         negative = "nextline(#{num},#{segment})"
       end
       <<-END
-        if (#{exp}) 
+        if (#{exp}.to_b) 
           #{positive}
         else
           #{negative}
@@ -336,5 +269,8 @@ module Basic
       command,*rest = c
       self.send("x_#{command}".to_sym,rest,number,segment)
     end
+    
+    extend self
+    
   end
 end

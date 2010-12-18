@@ -1,6 +1,7 @@
 require "readline"
 require "basic/program"
 require "basic/compiler"
+require "basic/lexer"
 
 class Array
   def split(delim)
@@ -45,6 +46,7 @@ end
 
 module Basic
   module Interpreter
+    
     def define(number,tokens)
       begin
         commands = tokens.split(':')
@@ -97,73 +99,6 @@ module Basic
       return true
     end
 
-    def read(input,output=[],token='')
-      if input.empty?
-        output.push(token) unless token.empty?
-        return output
-      end
-
-      first,rest = input[0..0],input[1..-1]
-
-      if first == " "
-        output.push(token) unless token.empty?
-        read(rest, output)
-
-      elsif first == "\""
-        output.push(token) unless token.empty?
-        read_string(rest, output)
-      
-      elsif "<".include?(first)
-        output.push(token) unless token.empty?
-        next_token = rest[0..0]
-        case next_token
-          when ">"
-            read(rest[1..-1], output+["<>"],"")
-          when "="
-            read(rest[1..-1], output+["<="],"")
-          else
-            read(rest,output+["<"],"")
-        end
-      
-      elsif ">".include?(first)
-        output.push(token) unless token.empty?
-        next_token = rest[0..0]
-        case next_token
-          when "="
-            read(rest[1..-1], output+[">="],"")
-          else
-            read(rest,output+[">"],"")
-        end
-      elsif "-".include?(first)
-        if token.empty?
-          read(rest,output,token+first)
-        else
-          output.push(token)
-          read(rest, output + [first], "")
-        end
-      elsif "+*/=():;,".include?(first)
-        output.push(token) unless token.empty?
-        read(rest, output + [first], "")
-
-      else
-        read(rest,output,token+first)
-      end
-
-    end
-
-    def read_string(input,output,string='')
-      if input.empty?
-        raise "[String needs end quote]"
-      end
-
-      first,rest = input[0..0],input[1..-1]
-      if first == "\""
-        return read(rest,output+["\"#{string}\""],"")
-      else
-        return read_string(rest,output,string+first)
-      end
-    end
-
     def reader(cmd)
       while line = cmd.call()
         first,*rest = read(line)
@@ -182,6 +117,7 @@ module Basic
       reader cmd
     end
 
+    include Lexer
     extend self
   end
 end
