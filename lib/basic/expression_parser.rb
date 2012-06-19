@@ -34,7 +34,7 @@ module Basic
     end
 
     def variable_name?(token)
-      token =~ /^[A-Z]+\$?$/
+      token =~ /^[A-Z][A-Z0-9]*\$?$/
     end
 
     def to_reverse_polish(tokens)
@@ -51,7 +51,7 @@ module Basic
           when token == "(" 
             stack.push [:left_bracket,token]
           when token == "-"
-            if i == 0 || token[i-1].type == :operator
+            if i == 0 || BasicLib::FUNCTIONS.include?(token[i-1])
               stack.push [:function,"NEG"]
             else
               output_higher_precedence_operators(stack,token,output)
