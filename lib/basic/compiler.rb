@@ -90,9 +90,9 @@ module Basic
       varn = c.shift
       var = varname(varn)
       if stringvar?(varn)
-          "#{var} = self.readline(\"? \")"
+          "#{var} = Value.new(self.readline(\"? \"))"
       else
-          "#{var} = self.readline(\"? \").to_f"
+          "#{var} = Value.new(self.readline(\"? \").to_f)"
       end
     end
 
