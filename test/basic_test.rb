@@ -80,6 +80,15 @@ class BasicTest < Test::Unit::TestCase
     assert_match /GREATER THAN 3/, output
   end
 
+  def test_string_equal
+    output = capture <<-'END'
+      10 LET A$ = "H" + "A"
+      20 IF A$ = "HA" THEN PRINT "HELLO"
+      RUN
+    END
+    assert_match /HELLO/,output
+  end
+
   def test_if_else
     output = capture <<-'END'
       10 LET I = 4
