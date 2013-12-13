@@ -26,3 +26,7 @@ examples/creepy programs from Usborne's Creepy Computer Games.
 Knock yourselves out.
 
 Requires 'termios' to be installed.
+
+I talked a bit about it at the London Ruby Users Group in Jan 2011. Video here: http://webmail.skillsmatter.com/podcast/nosql/basic-interpreter
+
+Also, you might find the commit tagged STABLE works best.
