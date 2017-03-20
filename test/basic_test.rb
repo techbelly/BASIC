@@ -91,6 +91,51 @@ class BasicTest < Test::Unit::TestCase
     assert_match /GREATER THAN 3/, output
   end
 
+  def test_precedence1
+    output = capture <<-'END'
+      10 LET D = 0.3 * 26 + 1
+      20 PRINT D
+      RUN
+    END
+    assert_match(/8.8/, output)
+  end
+
+  def test_precedence2
+    output = capture <<-'END'
+      10 LET D = 0.3 + 26 * 2
+      20 PRINT D
+      RUN
+    END
+    assert_match(/52.3/, output)
+  end
+
+  def test_unary_minus
+    output = capture <<-'END'
+      10 LET D = 1 + -1
+      20 PRINT D
+      RUN
+    END
+    assert_match(/0/, output)
+  end
+
+  def test_unary_minus2
+    output = capture <<-'END'
+      10 LET D = -1 + 1
+      20 PRINT D
+      RUN
+    END
+    assert_match(/0/, output)
+  end
+
+  def test_minus
+    output = capture <<-'END'
+      10 LET D = 1  -2
+      20 PRINT D
+      RUN
+    END
+    assert_match(/-1/, output)
+  end
+
   def test_precedence
     output = capture <<-'END'
       10 LET D = 0.4

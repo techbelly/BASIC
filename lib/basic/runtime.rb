@@ -1,16 +1,16 @@
-require "termios"             
+require "termios"
 
 module Basic
   module Runtime
-        
-    # This is based on some code that I found in the 
+
+    # This is based on some code that I found in the
     # highrise library: http://highline.rubyforge.org/
-    def getbyte(wait_time=nil)      
+    def getbyte(wait_time=nil)
       input = $stdin
       old_settings = Termios.getattr(input)
       new_settings  =  old_settings.dup
       new_settings.c_lflag &= ~(Termios::ECHO | Termios::ICANON)
-      
+
       if wait_time
         wait_time = [wait_time,100].max
         new_settings.c_cc[Termios::VMIN] =  0
@@ -26,30 +26,30 @@ module Basic
         Termios.setattr(input, Termios::TCSAFLUSH, old_settings)
       end
     end
-    
+
     class BasicArray
       def initialize(extents,default)
         @hash = Hash.new(default)
         @extents = extents
       end
-              
+
       def [](key)
         @hash[key]
       end
-      
+
       def []=(key,value)
         @hash[key]= value
       end
-      
+
       def dimensions
         @extents.size
       end
     end
-    
+
     def create_array(extents)
       return BasicArray.new(extents,Value.new(0))
     end
-    
+
     def create_string_array(extents)
       return BasicArray.new(extents,Value.new(""))
     end
@@ -57,7 +57,7 @@ module Basic
     def funcname(string)
       string.downcase.gsub("$","_string")
     end
-    
+
     def basic_operator_to_ruby(op)
       {
         "+" =>   "plus",
@@ -65,10 +65,10 @@ module Basic
         "*" =>   "times",
         "/" =>   "divided_by",
         "OR" =>  "logic_or",
-        "AND" => "logic_and", 
+        "AND" => "logic_and",
         "=" =>   "equal",
         "<>" =>  "not_equal",
-        "<=" =>  "lte", 
+        "<=" =>  "lte",
         ">=" =>  "gte",
         "<" =>   "lt",
         ">" =>   "gt"
@@ -79,79 +79,79 @@ module Basic
       def initialize(value)
         @value = value
       end
-      
+
       def value
         @value
       end
-      
+
       def plus(other)
         @value+other.value
       end
-      
+
       def minus(other)
         @value-other.value
       end
-      
+
       def times(other)
         @value*other.value
       end
-      
+
       def divided_by(other)
         @value/other.value
       end
-      
+
       def wrap(value)
         value ? 1 : 0
       end
-      
+
       def to_b
         !(@value == 0)
       end
-      
+
       def logic_or(other)
         wrap(self.to_b || other.to_b)
       end
-      
+
       def logic_and(other)
         wrap(self.to_b && other.to_b)
       end
-      
+
       def equal(other)
         wrap(@value == other.value)
       end
-      
+
       def not_equal(other)
         wrap(@value != other.value)
       end
-      
+
       def lte(other)
         wrap(@value <= other.value)
       end
-      
+
       def gte(other)
         wrap(@value >= other.value)
       end
-      
+
       def lt(other)
         wrap(@value < other.value)
       end
-      
+
       def gt(other)
         wrap(@value > other.value)
       end
-    
+
       def to_s
         @value.to_s
       end
-      
+
       def inspect
         to_s
       end
-      
+
       def hash
         @value.hash
       end
-    
+
     end
 
     def evaluate(tokens)
@@ -194,7 +194,7 @@ module Basic
     def print_tab
       print("\t")
     end
-    
+
     def print_newline
       print("\n")
     end
@@ -219,7 +219,7 @@ module Basic
       end
       $stdout.flush
     end
-        
+
     def gosub(line_no,segment=0)
       while line_no
         method_name = self.class.method_name(line_no,segment)

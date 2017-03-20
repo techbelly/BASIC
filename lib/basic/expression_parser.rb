@@ -15,10 +15,15 @@ module Basic
     end
 
     def output_any_functions(stack,output)
-      type,top = stack[-1]
-      if type == :function || type == :variable || type == :array_ref
+      type, _ = stack[-1]
+      if type == :function || type == :array_ref
         output << stack.pop
       end
+    end
+
+    def stack_top_operator?(stack)
+      type, _ = stack[-1]
+      [:function, :array_ref, :operator, :left_bracket].include? type
     end
 
     def output_higher_precedence_operators(stack,token,output)
@@ -40,36 +45,37 @@ module Basic
     def to_reverse_polish(tokens)
       output = []
       stack = []
+
       tokens.each_with_index do |token,i|
         case
-          when token == ")"
-            pop_back_to_left_bracket(stack,output)
-            output_any_functions(stack,output)
+          when BasicLib::FUNCTIONS.include?(token)
+            stack.push [:function,token]
+          when token == "-" && (i == 0 || stack_top_operator?(stack))
+            stack.push [:function,"NEG"]
           when token == ","
             pop_back_to_left_bracket(stack,output)
             stack.push [:left_bracket,"("]
+          when token == ")"
+            pop_back_to_left_bracket(stack,output)
+            output_any_functions(stack,output)
           when token == "("
             stack.push [:left_bracket,token]
-          when token == "-"
-            if i == 0 || BasicLib::FUNCTIONS.include?(token[i-1])
-              stack.push [:function,"NEG"]
-            else
-              output_higher_precedence_operators(stack,token,output)
-              stack.push [:operator,token]
-            end
-          when BasicLib::FUNCTIONS.include?(token)
-            stack.push [:function,token]
           when BasicLib::OPERATORS.include?(token)
              output_higher_precedence_operators(stack,token,output)
              stack.push [:operator,token]
           when variable_name?(token) && tokens[i+1] == "("
-            stack.push [:array_ref,token]
+             stack.push [:array_ref,token]
           when variable_name?(token)
-            output << [:variable,token]
-          when token =~ /^\.\d+$/ # ruby 2.3 no longer allows .4 as float literal
-            output << [:literal,eval("0"+token)]
+             output << [:variable,token]
           else
-            output << [:literal,eval(token)]
+             token = "0" + token if token =~ /^\.\d+$/ # ruby 2.3 no longer allows .4 as float literal
+             type, func = stack[-1]
+             if type == :function && func == "NEG"
+               stack.pop
+               output << [:literal,eval("-"+token)]
+             else
+               output << [:literal,eval(token)]
+             end
         end
       end
 
