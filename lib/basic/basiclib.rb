@@ -1,6 +1,6 @@
 module Basic
   module BasicLib
-    FUNCTIONS = %w[ VAL TAB RND INT CHR$ SIN GET GET$ INKEY INKEY$ ABS SQR ATN ]
+    FUNCTIONS = %w[ VAL TAB RND INT CHR$ ASC SIN GET GET$ INKEY INKEY$ ABS SQR ATN ]
     OPERATORS = %w[ + - * /  OR AND = <> <= >= < > ]
     EXPRESSION_TERMINATORS = %w[ : ; THEN TO STEP ELSE]
 
@@ -22,6 +22,10 @@ module Basic
 
     def chr_string(int)
       int.chr
+    end
+
+    def asc(string)
+      string.ord
     end
 
     def int(num)
