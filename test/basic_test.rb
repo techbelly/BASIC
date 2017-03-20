@@ -23,6 +23,16 @@ class BasicTest < Test::Unit::TestCase
     string.strip.gsub(/^\s+/, "")
   end
 
+  def test_print_multiple
+    output = capture <<-'END'
+      10 LET A=1
+      20 LET B=2
+      30 PRINT A;" ";B
+      RUN
+    END
+    assert_match /1 2/,output
+  end
+
   def test_negative_numbers
     output = capture <<-'END'
       10 LET A=-1
