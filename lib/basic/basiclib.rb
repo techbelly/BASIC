@@ -1,7 +1,21 @@
 module Basic
   module BasicLib
     FUNCTIONS = %w[ VAL TAB RND INT CHR$ ASC SIN GET GET$ INKEY INKEY$ ABS SQR ATN ]
-    OPERATORS = %w[ OR AND = <> <= >= < > + - * /]
+    OPERATORS = %w[ OR AND = <> <= >= < > + - * / -!-]
+    PRECEDENCE = { "OR" => 0,
+                   "AND" => 0,
+                   "=" => 1,
+                   "<>" => 1,
+                   "<=" => 1,
+                   ">=" => 1,
+                   "<" => 1,
+                   ">" => 1,
+                   "+" => 2,
+                   "-" => 2,
+                   "*" => 3,
+                   "/" => 3,
+                   "-!-" => 4
+    }
     EXPRESSION_TERMINATORS = %w[ : ; THEN TO STEP ELSE]
 
     def val(str)

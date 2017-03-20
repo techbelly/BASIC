@@ -71,7 +71,8 @@ module Basic
         "<=" =>  "lte",
         ">=" =>  "gte",
         "<" =>   "lt",
-        ">" =>   "gt"
+        ">" =>   "gt",
+        "-!-" => "neg"
       }[op]
     end
 
@@ -82,6 +83,10 @@ module Basic
 
       def value
         @value
+      end
+
+      def neg
+        -@value
       end
 
       def plus(other)
@@ -154,14 +159,23 @@ module Basic
 
     end
 
+    def unary?(operator)
+      operator == "neg"
+    end
+
     def evaluate(tokens)
       stack = []
       tokens.each do |type,token|
         case type
           when :operator
             operator = basic_operator_to_ruby(token)
-            addend, augend = stack.pop, stack.pop
-            stack.push Value.new(augend.send(operator.to_sym,addend))
+            if unary?(operator)
+              addend = stack.pop
+              stack.push Value.new(addend.send(operator.to_sym))
+            else
+              addend, augend = stack.pop, stack.pop
+              stack.push Value.new(augend.send(operator.to_sym,addend))
+            end
           when :function
             funcname = funcname(token)
             arity = method(funcname).arity

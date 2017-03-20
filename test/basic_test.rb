@@ -109,6 +109,22 @@ class BasicTest < Test::Unit::TestCase
     assert_match(/52.3/, output)
   end
 
+  def test_precedence3
+    output = capture <<-'END'
+      10 PRINT 2.0 / - 7.0 + ( - 9.0 * 8.0 ) * 2.0 - 9.0 - 5.0
+      RUN
+    END
+    assert_match(/-158/, output)
+  end
+
+  def test_precedence4
+    output = capture <<-'END'
+      10 PRINT --(2 * 3) + 3 - 3 + 1 * 7
+      RUN
+    END
+    assert_match(/13/, output)
+  end
+
   def test_unary_minus
     output = capture <<-'END'
       10 LET D = 1 + -1

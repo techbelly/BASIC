@@ -21,15 +21,18 @@ module Basic
       end
     end
 
-    def stack_top_operator?(stack)
-      type, _ = stack[-1]
-      [:function, :array_ref, :operator, :left_bracket].include? type
+    def expecting_unary?(tokens,i)
+      return true if i == 0
+      previous_token = tokens[i-1]
+      return true if BasicLib::OPERATORS.include?(previous_token)
+      return true if "(,".include?(previous_token)
+      return false
     end
 
     def output_higher_precedence_operators(stack,token,output)
       type,top = stack[-1]
       while type == :operator
-        if BasicLib::OPERATORS.index(top) > BasicLib::OPERATORS.index(token)
+        if BasicLib::PRECEDENCE[top] >= BasicLib::PRECEDENCE[token]
           output << stack.pop
           type,top = stack[-1]
         else
@@ -50,8 +53,8 @@ module Basic
         case
           when BasicLib::FUNCTIONS.include?(token)
             stack.push [:function,token]
-          when token == "-" && (i == 0 || stack_top_operator?(stack))
-            stack.push [:function,"NEG"]
+          when token == "-" && expecting_unary?(tokens, i)
+            stack.push [:operator,"-!-"]
           when token == ","
             pop_back_to_left_bracket(stack,output)
             stack.push [:left_bracket,"("]
@@ -69,13 +72,7 @@ module Basic
              output << [:variable,token]
           else
              token = "0" + token if token =~ /^\.\d+$/ # ruby 2.3 no longer allows .4 as float literal
-             type, func = stack[-1]
-             if type == :function && func == "NEG"
-               stack.pop
-               output << [:literal,eval("-"+token)]
-             else
-               output << [:literal,eval(token)]
-             end
+             output << [:literal,eval(token)]
         end
       end
 
