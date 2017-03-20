@@ -41,14 +41,14 @@ module Basic
       output = []
       stack = []
       tokens.each_with_index do |token,i|
-        case 
+        case
           when token == ")"
             pop_back_to_left_bracket(stack,output)
             output_any_functions(stack,output)
           when token == ","
             pop_back_to_left_bracket(stack,output)
             stack.push [:left_bracket,"("]
-          when token == "(" 
+          when token == "("
             stack.push [:left_bracket,token]
           when token == "-"
             if i == 0 || BasicLib::FUNCTIONS.include?(token[i-1])
@@ -64,8 +64,10 @@ module Basic
              stack.push [:operator,token]
           when variable_name?(token) && tokens[i+1] == "("
             stack.push [:array_ref,token]
-          when variable_name?(token) 
+          when variable_name?(token)
             output << [:variable,token]
+          when token =~ /^\.\d+$/ # ruby 2.3 no longer allows .4 as float literal
+            output << [:literal,eval("0"+token)]
           else
             output << [:literal,eval(token)]
         end

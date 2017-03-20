@@ -81,6 +81,15 @@ class BasicTest < Test::Unit::TestCase
     assert_match /GREATER THAN 3/, output
   end
 
+  def test_parse_floats
+    output = capture <<-'END'
+      10 LET A = .4
+      20 IF A = 0.4 THEN PRINT "HELLO"
+      RUN
+    END
+    assert_match("HELLO", output)
+  end
+
   def test_string_equal
     output = capture <<-'END'
       10 LET A$ = "H" + "A"
@@ -111,7 +120,7 @@ class BasicTest < Test::Unit::TestCase
     END
     assert_match /LTE THAN 4\nLTE THAN 5/, output
   end
-  
+
   def test_greater_than_or_equal_to
     output = capture <<-'END'
       10 LET I = 4
@@ -122,7 +131,7 @@ class BasicTest < Test::Unit::TestCase
     END
     assert_match /GTE THAN 3\nGTE THAN 4/, output
   end
-  
+
   def test_less_than
     output = capture <<-'END'
       10 LET I = 4
@@ -133,7 +142,7 @@ class BasicTest < Test::Unit::TestCase
     END
     assert_match /LESS THAN 5/, output
   end
-  
+
   def test_dim_defines_an_array
     output = capture <<-'END'
       10 DIM A(8)
@@ -144,7 +153,7 @@ class BasicTest < Test::Unit::TestCase
     END
     assert_match /RESULT 2/, output
   end
-  
+
   def test_multidimensional_string_arrays
     output = capture <<-'END'
     10 DIM A$(3,3)
@@ -164,9 +173,9 @@ xxx
 xAB
 xxC
 END
-    assert_equal result.chomp, output 
+    assert_equal result.chomp, output
   end
-  
+
   def test_multidimensional_number_arrays
     output = capture <<-'END'
       10 DIM A(3,3)
@@ -188,7 +197,7 @@ END
 END
     assert_equal result.chomp, output
   end
-  
+
   def test_assignment_to_multidimensional_number_arrays
     output = capture <<-'END'
       10 DIM A(3,3)
@@ -211,7 +220,7 @@ END
 END
     assert_equal result.chomp, output
   end
-  
+
   def test_not_equal_to
     output = capture <<-'END'
       10 LET I = 4
@@ -231,7 +240,7 @@ END
       RUN
     END
     assert_in_delta 4/3.0,output.to_f,0.0001
-  end 
+  end
 
   def test_should_list_program
     program = blockquote <<-'END'
