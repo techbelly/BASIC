@@ -15,6 +15,7 @@ class BasicTest < Test::Unit::TestCase
     $stdout = StringIO.new(output)
     Basic::Interpreter.run(cmd)
     $stdin, $stdout = old_stdin, old_stdout
+    raise output if output.include?("SYNTAX ERROR")
     output.sub(/^READY\n/, "").strip
   end
 
