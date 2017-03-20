@@ -81,6 +81,18 @@ class BasicTest < Test::Unit::TestCase
     assert_match /GREATER THAN 3/, output
   end
 
+  def test_precedence
+    output = capture <<-'END'
+      10 LET D = 0.4
+      20 LET D1 = 0.5
+      30 IF D-D1>0 THEN PRINT "FALSE"
+      40 IF D1-D>0 THEN PRINT "TRUE"
+      RUN
+    END
+    assert_match(/TRUE/, output)
+    assert_no_match(/FALSE/, output)
+  end
+
   def test_parse_floats
     output = capture <<-'END'
       10 LET A = .4
