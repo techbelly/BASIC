@@ -33,6 +33,52 @@ class BasicTest < Test::Unit::TestCase
     assert_match /1 2/,output
   end
 
+  def test_printing1
+    output = capture <<-'END'
+      10 LET A=1
+      30 PRINT A,
+      RUN
+    END
+    assert_match /1/,output
+  end
+
+  def test_printing2
+    output = capture <<-'END'
+      10 LET A=1
+      30 PRINT A;
+      RUN
+    END
+    assert_match /1/,output
+  end
+
+  def test_printing3
+    output = capture <<-'END'
+      10 DIM A$(1,1)
+      20 LET A$(1,1) = "MONKEYS"
+      30 PRINT A$(1,1);
+      RUN
+    END
+    assert_match /MONKEYS/,output
+  end
+
+  def test_printing4
+    output = capture <<-'END'
+      10 LET A=1
+      30 PRINT A,"HELLO","BAH"
+      RUN
+    END
+    assert_match /1\tHELLO\tBAH/,output
+  end
+
+  def test_printing5
+    output = capture <<-'END'
+      10 LET A=1
+      30 PRINT A;"HELLO";"BAH"
+      RUN
+    END
+    assert_match /1HELLOBAH/,output
+  end
+
   def test_negative_numbers
     output = capture <<-'END'
       10 LET A=-1

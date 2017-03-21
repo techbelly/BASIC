@@ -9,12 +9,12 @@ module Basic
     end
 
     include ExpressionParser
-    
-    def expression(command)
+
+    def expression(command, terminators = BasicLib::EXPRESSION_TERMINATORS)
       exp = []
       while !command.empty?
         token = command.first
-        if BasicLib::EXPRESSION_TERMINATORS.include?(token)
+        if terminators.include?(token)
           break
         else
           exp << command.shift
@@ -26,7 +26,7 @@ module Basic
         return ""
       end
     end
-    
+
     def variable_expression(token,command)
       var = varname(token)
        if command.first == "("
@@ -40,7 +40,7 @@ module Basic
        end
        var
     end
-    
+
     def index_expression(command)
       out_expression = [command.shift]
       left_brackets = 1
@@ -81,11 +81,11 @@ module Basic
         [commands,nextline(num,seg)].join("\n")
       end
     end
-    
+
     def stringvar?(varn)
       varn =~ /\$$/
     end
-    
+
     simple_statement(:INPUT) do |c|
       varn = c.shift
       var = varname(varn)
@@ -111,8 +111,8 @@ module Basic
 
     simple_statement(:DIM) do |c|
       varn = c.shift
-      var = varname(varn) 
-      expect(c,"(") 
+      var = varname(varn)
+      expect(c,"(")
       sizes = []
       begin
         # TODO: should we allow an expression here?
@@ -125,7 +125,7 @@ module Basic
         "#{var} = self.create_array([#{sizes.join(",")}])"
       end
     end
-    
+
     simple_statement(:LET) do |c|
       var = variable_expression(c.shift,c)
       expect(c,"=")
@@ -139,7 +139,7 @@ module Basic
       output = <<-END
         tab = (#{tabnum})
         if (tab>0)
-          if (tab<self.cols) 
+          if (tab<self.cols)
             self.print_newline
             self.print " "*(tab % self.maxcol)
           else
@@ -159,27 +159,46 @@ module Basic
 
     simple_statement(:PRINT) do |c|
       statements = []
-      statements << "self.print_newline" if c.empty?   
-      while not c.empty? && ! BasicLib::EXPRESSION_TERMINATORS.include?(c.first)
-        if c.first == "TAB"
-          statements << print_tab(c)
-        elsif c.first == "SPC"
-          statements << print_spc(c)
+      statements << "self.print_newline\n" if c.empty?
+      
+      terminators = BasicLib::EXPRESSION_TERMINATORS + [","]
+      expressions = []
+      paren_count = 0
+      current_expression = []
+
+      c.each do |token|
+        paren_count += 1 if token == "("
+        paren_count -= 1 if token == ")"
+        if terminators.include?(token) && paren_count == 0
+          expressions << [current_expression, token]
+          current_expression = []
         else
-          out = expression(c)
-          statements << "self.print(#{out})"
-        end
-        if c.empty?
-          statements << "self.print_newline"
-        else
-          delim = expect(c,",",";")
-          if delim == ","
-            statements << "self.print_tab"
-          elsif delim == ";"
-            break if c.empty?
-          end
+          current_expression << token
         end
       end
+
+      expressions << [current_expression, nil] unless current_expression.empty?
+
+      expressions.each do |(c, delim)|
+        while not c.empty?
+          if c.first == "TAB"
+            statements << print_tab(c)
+          elsif c.first == "SPC"
+            statements << print_spc(c)
+          else
+            out = expression(c)
+            statements << "self.print(#{out})"
+          end
+        end
+
+        if !delim
+          statements << "self.print_newline"
+        else
+          delim = expect([delim],",",";")
+          statements << "self.print_tab" if delim == ","
+        end
+      end
+
       statements.join("\n")
     end
 
@@ -218,7 +237,7 @@ module Basic
       segvar = varname(varn+"_segment")
       <<-END
         #{var} = Value.new(#{var}.plus(#{stepvar}))
-        value = #{var}.value 
+        value = #{var}.value
         if #{stepvar}.value > 0 && value > #{endvar}.value
           nextline(#{num},#{segment})
         elsif #{stepvar}.value < 0 && value < #{endvar}.value
@@ -232,18 +251,18 @@ module Basic
     def x_STOP(c,num,segment)
       "raise StopException"
     end
-    
+
     def x_RUN(c,num,segment)
        "raise RerunException"
     end
-    
+
     def x_RETURN(c,num,segment)
       "return"
     end
 
     def x_IF(c,num,segment)
       exp = expression(c)
-      expect(c,"THEN") 
+      expect(c,"THEN")
       poscommand,negcommand = c.split("ELSE")
       positive = self.compile(poscommand,num,segment)
       if negcommand
@@ -252,7 +271,7 @@ module Basic
         negative = "nextline(#{num},#{segment})"
       end
       <<-END
-        if (#{exp}.to_b) 
+        if (#{exp}.to_b)
           #{positive}
         else
           #{negative}
@@ -269,8 +288,8 @@ module Basic
       command,*rest = c
       self.send("x_#{command}".to_sym,rest,number,segment)
     end
-    
+
     extend self
-    
+
   end
 end
