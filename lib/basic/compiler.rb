@@ -137,7 +137,7 @@ module Basic
       expect(c,"TAB")
       tabnum = expression(index_expression(c))
       output = <<-END
-        tab = (#{tabnum})
+        tab = (#{tabnum}).value
         if (tab>0)
           if (tab<self.cols)
             self.print_newline
@@ -160,7 +160,7 @@ module Basic
     simple_statement(:PRINT) do |c|
       statements = []
       statements << "self.print_newline\n" if c.empty?
-      
+
       terminators = BasicLib::EXPRESSION_TERMINATORS + [","]
       expressions = []
       paren_count = 0
