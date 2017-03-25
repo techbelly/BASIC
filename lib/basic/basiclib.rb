@@ -1,37 +1,38 @@
+# frozen_string_literal: true
 module Basic
   module BasicLib
-    FUNCTIONS = %w[ VAL TAB RND INT CHR$ ASC SIN GET GET$ INKEY INKEY$ ABS SQR ATN ]
-    OPERATORS = %w[ OR AND = <> <= >= < > + - * / -!-]
-    PRECEDENCE = { "OR" => 0,
-                   "AND" => 0,
-                   "=" => 1,
-                   "<>" => 1,
-                   "<=" => 1,
-                   ">=" => 1,
-                   "<" => 1,
-                   ">" => 1,
-                   "+" => 2,
-                   "-" => 2,
-                   "*" => 3,
-                   "/" => 3,
-                   "-!-" => 4
-    }
-    EXPRESSION_TERMINATORS = %w[ : ; THEN TO STEP ELSE]
+    FUNCTIONS = %w(VAL TAB RND INT CHR$ ASC SIN
+                   GET GET$ INKEY INKEY$ ABS SQR ATN).freeze
+    OPERATORS = %w(OR AND = <> <= >= < > + - * / -!-).freeze
+    PRECEDENCE = { 'OR' => 0,
+                   'AND' => 0,
+                   '=' => 1,
+                   '<>' => 1,
+                   '<=' => 1,
+                   '>=' => 1,
+                   '<' => 1,
+                   '>' => 1,
+                   '+' => 2,
+                   '-' => 2,
+                   '*' => 3,
+                   '/' => 3,
+                   '-!-' => 4 }.freeze
+    EXPRESSION_TERMINATORS = %w(: ; THEN TO STEP ELSE).freeze
 
     def val(str)
       str.to_i
     end
 
     def neg(num)
-      -(num)
+      -num
     end
 
     def tab(num)
-      " "*num
+      ' ' * num
     end
 
     def rnd(num)
-      rand*num.to_f
+      rand * num.to_f
     end
 
     def chr_string(int)
@@ -72,13 +73,12 @@ module Basic
       code == -1 ? '' : code.chr
     end
 
-    def get()
+    def get
       getbyte
     end
 
-    def get_string()
+    def get_string
       get.chr
     end
-
   end
 end

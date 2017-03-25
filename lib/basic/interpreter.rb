@@ -1,17 +1,17 @@
-require "readline"
-require "basic/program"
-require "basic/compiler"
-require "basic/lexer"
+# frozen_string_literal: true
+require 'readline'
+require 'basic/program'
+require 'basic/compiler'
+require 'basic/lexer'
 
 class Array
   def split(delim)
-    self.inject([[]]) do |c, e|
-       if e == delim
-         c << []
-       else
-         c.last << e
-       end
-       c
+    each_with_object([[]]) do |e, c|
+      if e == delim
+        c << []
+      else
+        c.last << e
+      end
     end
   end
 end
@@ -24,7 +24,7 @@ end
 
 class Fixnum
   def /(other)
-    self.to_f / other
+    to_f / other
   end
 end
 
@@ -32,8 +32,8 @@ class FalseClass
   define_method :"!" do
     true
   end
-  
-  define_method :"||" do |other| 
+
+  define_method :"||" do |other|
     self || other
   end
 end
@@ -46,42 +46,39 @@ end
 
 module Basic
   module Interpreter
-    
-    def define(number,tokens)
-      begin
-        commands = tokens.split(':')
-        commands.each_with_index do |c,segment|
-          method_body = Compiler.compile(c,number,segment)
-          Program.define(number,segment,c,method_body)
-        end
-      rescue SyntaxError => e
-        puts "SYNTAX ERROR in LINE #{number}"
-        puts e
-        puts tokens.join(" ")
+    def define(number, tokens)
+      commands = tokens.split(':')
+      commands.each_with_index do |c, segment|
+        method_body = Compiler.compile(c, number, segment)
+        Program.define(number, segment, c, method_body)
       end
+    rescue SyntaxError => e
+      puts "SYNTAX ERROR in LINE #{number}"
+      puts e
+      puts tokens.join(' ')
     end
 
-    def compile(number,tokens)
-      if tokens.empty? 
+    def compile(number, tokens)
+      if tokens.empty?
         Program.remove(number)
       else
-        define number,tokens
+        define number, tokens
       end
     end
 
-    def execute(line,rest)
+    def execute(line, rest)
       case line
-      when "RUN"
+      when 'RUN'
         Program.run
-      when "LIST"
+      when 'LIST'
         Program.list
-      when "RENUMBER"
+      when 'RENUMBER'
         Program.renumber *rest
-      when "GENERATED"
+      when 'GENERATED'
         Program.generated
-      when "LOAD"
+      when 'LOAD'
         Program.clear
-        filename = rest.shift.strip_str("\"")
+        filename = rest.shift.strip_str('"')
         f = File.open(filename)
         reader(lambda do
           line = f.gets
@@ -91,27 +88,27 @@ module Basic
             return false
           end
         end)
-      when "EXIT"
+      when 'EXIT'
         return false
       else
-        puts "HUH?"
+        puts 'HUH?'
       end
-      return true
+      true
     end
 
     def reader(cmd)
-      while line = cmd.call()
-        first,*rest = read(line)
+      while line = cmd.call
+        first, *rest = read(line)
         if first =~ /\d+/
           compile first.to_i, rest
         else
-          execute first,rest or return
+          execute(first, rest) || return
         end
       end
     end
 
-    def run(cmd=nil)
-      cmd ||= lambda { Readline.readline('> ',true) }
+    def run(cmd = nil)
+      cmd ||= -> { Readline.readline('> ', true) }
       Program.clear
       print "\nREADY\n"
       reader cmd

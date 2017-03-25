@@ -1,26 +1,26 @@
-require "termios"
+# frozen_string_literal: true
+require 'termios'
 
 module Basic
   module Runtime
-
     # This is based on some code that I found in the
     # highrise library: http://highline.rubyforge.org/
-    def getbyte(wait_time=nil)
+    def getbyte(wait_time = nil)
       input = $stdin
       old_settings = Termios.getattr(input)
-      new_settings  =  old_settings.dup
+      new_settings = old_settings.dup
       new_settings.c_lflag &= ~(Termios::ECHO | Termios::ICANON)
 
       if wait_time
-        wait_time = [wait_time,100].max
-        new_settings.c_cc[Termios::VMIN] =  0
-        new_settings.c_cc[Termios::VTIME] =  (wait_time/10.0)
+        wait_time = [wait_time, 100].max
+        new_settings.c_cc[Termios::VMIN] = 0
+        new_settings.c_cc[Termios::VTIME] = (wait_time / 10.0)
       else
-        new_settings.c_cc[Termios::VMIN] =  1
+        new_settings.c_cc[Termios::VMIN] = 1
       end
 
       begin
-        Termios.setattr(input, Termios::TCSAFLUSH , new_settings)
+        Termios.setattr(input, Termios::TCSAFLUSH, new_settings)
         input.getbyte
       ensure
         Termios.setattr(input, Termios::TCSAFLUSH, old_settings)
@@ -28,7 +28,7 @@ module Basic
     end
 
     class BasicArray
-      def initialize(extents,default)
+      def initialize(extents, default)
         @hash = Hash.new(default)
         @extents = extents
       end
@@ -37,8 +37,8 @@ module Basic
         @hash[key]
       end
 
-      def []=(key,value)
-        @hash[key]= value
+      def []=(key, value)
+        @hash[key] = value
       end
 
       def dimensions
@@ -47,32 +47,32 @@ module Basic
     end
 
     def create_array(extents)
-      return BasicArray.new(extents,Value.new(0))
+      BasicArray.new(extents, Value.new(0))
     end
 
     def create_string_array(extents)
-      return BasicArray.new(extents,Value.new(""))
+      BasicArray.new(extents, Value.new(''))
     end
 
     def funcname(string)
-      string.downcase.gsub("$","_string")
+      string.downcase.gsub('$', '_string')
     end
 
     def basic_operator_to_ruby(op)
       {
-        "+" =>   "plus",
-        "-" =>   "minus",
-        "*" =>   "times",
-        "/" =>   "divided_by",
-        "OR" =>  "logic_or",
-        "AND" => "logic_and",
-        "=" =>   "equal",
-        "<>" =>  "not_equal",
-        "<=" =>  "lte",
-        ">=" =>  "gte",
-        "<" =>   "lt",
-        ">" =>   "gt",
-        "-!-" => "neg"
+        '+' =>   'plus',
+        '-' =>   'minus',
+        '*' =>   'times',
+        '/' =>   'divided_by',
+        'OR' =>  'logic_or',
+        'AND' => 'logic_and',
+        '=' =>   'equal',
+        '<>' =>  'not_equal',
+        '<=' =>  'lte',
+        '>=' =>  'gte',
+        '<' =>   'lt',
+        '>' =>   'gt',
+        '-!-' => 'neg'
       }[op]
     end
 
@@ -81,28 +81,26 @@ module Basic
         @value = value
       end
 
-      def value
-        @value
-      end
+      attr_reader :value
 
       def neg
         -@value
       end
 
       def plus(other)
-        @value+other.value
+        @value + other.value
       end
 
       def minus(other)
-        @value-other.value
+        @value - other.value
       end
 
       def times(other)
-        @value*other.value
+        @value * other.value
       end
 
       def divided_by(other)
-        @value/other.value
+        @value / other.value
       end
 
       def wrap(value)
@@ -110,15 +108,15 @@ module Basic
       end
 
       def to_b
-        !(@value == 0)
+        !(@value.zero?)
       end
 
       def logic_or(other)
-        wrap(self.to_b || other.to_b)
+        wrap(to_b || other.to_b)
       end
 
       def logic_and(other)
-        wrap(self.to_b && other.to_b)
+        wrap(to_b && other.to_b)
       end
 
       def equal(other)
@@ -156,46 +154,45 @@ module Basic
       def hash
         @value.hash
       end
-
     end
 
     def unary?(operator)
-      operator == "neg"
+      operator == 'neg'
     end
 
     def evaluate(tokens)
       stack = []
-      tokens.each do |type,token|
+      tokens.each do |type, token|
         case type
-          when :operator
-            operator = basic_operator_to_ruby(token)
-            if unary?(operator)
-              addend = stack.pop
-              stack.push Value.new(addend.send(operator.to_sym))
-            else
-              addend, augend = stack.pop, stack.pop
-              stack.push Value.new(augend.send(operator.to_sym,addend))
-            end
-          when :function
-            funcname = funcname(token)
-            arity = method(funcname).arity
-            args = []
-            arity.times do
-              args.unshift stack.pop
-            end
-            stack.push Value.new(self.send(funcname.to_sym,*args.map{|a| a.value}))
-          when :array_ref
-            array = self.env[token]
-            dimensions = array.dimensions
-            args = []
-            dimensions.times do
-              args.unshift stack.pop
-            end
-            stack.push array[args.map {|s| s.value}]
-          when :variable
-            stack.push self.env[token]
+        when :operator
+          operator = basic_operator_to_ruby(token)
+          addend = stack.pop
+          if unary?(operator)            
+            stack.push Value.new(addend.send(operator.to_sym))
           else
-            stack.push Value.new(token)
+            augend = stack.pop
+            stack.push Value.new(augend.send(operator.to_sym, addend))
+          end
+        when :function
+          funcname = funcname(token)
+          arity = method(funcname).arity
+          args = []
+          arity.times do
+            args.unshift stack.pop
+          end
+          stack.push Value.new(send(funcname.to_sym, *args.map(&:value)))
+        when :array_ref
+          array = env[token]
+          dimensions = array.dimensions
+          args = []
+          dimensions.times do
+            args.unshift stack.pop
+          end
+          stack.push array[args.map(&:value)]
+        when :variable
+          stack.push env[token]
+        else
+          stack.push Value.new(token)
         end
       end
       stack.pop
@@ -221,11 +218,11 @@ module Basic
       @cols ||= 0
       string.to_s.each_char do |c|
         $stdout.print c
-        if c == "\n"
-          @cols = 0
-        else
-          @cols = @cols + 1
-        end
+        @cols = if c == "\n"
+                  0
+                else
+                  @cols + 1
+                end
         if @cols > maxcol
           $stdout.print "\n"
           @cols = 0
@@ -234,23 +231,23 @@ module Basic
       $stdout.flush
     end
 
-    def gosub(line_no,segment=0)
+    def gosub(line_no, segment = 0)
       while line_no
-        method_name = self.class.method_name(line_no,segment)
-        line_no,segment = self.send(method_name)
+        method_name = self.class.method_name(line_no, segment)
+        line_no, segment = send(method_name)
       end
     end
 
     def readline(prompt)
-      return Readline.readline(prompt)
+      Readline.readline(prompt)
     end
 
     def env
       self.class.env
     end
 
-    def nextline(num,segment)
-      self.class.next(num,segment)
+    def nextline(num, segment)
+      self.class.next(num, segment)
     end
   end
 end

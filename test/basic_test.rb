@@ -1,26 +1,28 @@
-lib = File.expand_path("../../lib", __FILE__)
-$:.unshift lib unless $:.include?(lib)
+# frozen_string_literal: true
+lib = File.expand_path('../../lib', __FILE__)
+$LOAD_PATH.unshift lib unless $LOAD_PATH.include?(lib)
 
-require "test/unit"
-require "basic/interpreter"
-require "stringio"
+require 'test/unit'
+require 'basic/interpreter'
+require 'stringio'
 
 class BasicTest < Test::Unit::TestCase
-
   def capture(string)
-    old_stdin, old_stdout = $stdin, $stdout
-    lines = string.strip.split(/\n/).map{ |s| s.strip } + %w[EXIT]
-    cmd = lambda{ lines.shift }
-    output = ""
+    old_stdin = $stdin
+    old_stdout = $stdout
+    lines = string.strip.split(/\n/).map(&:strip) + %w(EXIT)
+    cmd = -> { lines.shift }
+    output = String.new('')
     $stdout = StringIO.new(output)
     Basic::Interpreter.run(cmd)
-    $stdin, $stdout = old_stdin, old_stdout
-    raise output if output.include?("SYNTAX ERROR")
-    output.sub(/^READY\n/, "").strip
+    $stdin = old_stdin
+    $stdout = old_stdout
+    raise output if output.include?('SYNTAX ERROR')
+    output.sub(/^READY\n/, '').strip
   end
 
   def blockquote(string)
-    string.strip.gsub(/^\s+/, "")
+    string.strip.gsub(/^\s+/, '')
   end
 
   def test_print_multiple
@@ -30,7 +32,7 @@ class BasicTest < Test::Unit::TestCase
       30 PRINT A;" ";B
       RUN
     END
-    assert_match /1 2/,output
+    assert_match(/1 2/, output)
   end
 
   def test_printing1
@@ -39,7 +41,7 @@ class BasicTest < Test::Unit::TestCase
       30 PRINT A,
       RUN
     END
-    assert_match /1/,output
+    assert_match(/1/, output)
   end
 
   def test_printing2
@@ -48,7 +50,7 @@ class BasicTest < Test::Unit::TestCase
       30 PRINT A;
       RUN
     END
-    assert_match /1/,output
+    assert_match(/1/, output)
   end
 
   def test_printing3
@@ -58,7 +60,7 @@ class BasicTest < Test::Unit::TestCase
       30 PRINT A$(1,1);
       RUN
     END
-    assert_match /MONKEYS/,output
+    assert_match(/MONKEYS/, output)
   end
 
   def test_printing4
@@ -67,7 +69,7 @@ class BasicTest < Test::Unit::TestCase
       30 PRINT A,"HELLO","BAH"
       RUN
     END
-    assert_match /1\tHELLO\tBAH/,output
+    assert_match(/1\tHELLO\tBAH/, output)
   end
 
   def test_printing5
@@ -76,7 +78,7 @@ class BasicTest < Test::Unit::TestCase
       30 PRINT A;"HELLO";"BAH"
       RUN
     END
-    assert_match /1HELLOBAH/,output
+    assert_match(/1HELLOBAH/, output)
   end
 
   def test_negative_numbers
@@ -85,7 +87,7 @@ class BasicTest < Test::Unit::TestCase
       20 PRINT A
       RUN
     END
-    assert_match /-1/,output
+    assert_match(/-1/, output)
   end
 
   def test_positive_step_in_FOR_loop
@@ -95,7 +97,7 @@ class BasicTest < Test::Unit::TestCase
       30 NEXT I
       RUN
     END
-    assert_match /1\n3/, output
+    assert_match(/1\n3/, output)
   end
 
   def test_negative_step_in_FOR_loop
@@ -105,7 +107,7 @@ class BasicTest < Test::Unit::TestCase
       30 NEXT I
       RUN
     END
-    assert_match /4\n2/, output
+    assert_match(/4\n2/, output)
   end
 
   def test_should_count_up_in_FOR_loop
@@ -115,7 +117,7 @@ class BasicTest < Test::Unit::TestCase
       30 NEXT I
       RUN
     END
-    assert_match /1\n2\n3\n4/, output
+    assert_match(/1\n2\n3\n4/, output)
   end
 
   def test_for_loop_on_one_line
@@ -123,7 +125,7 @@ class BasicTest < Test::Unit::TestCase
       10 FOR I=1 TO 4: PRINT I: NEXT I
       RUN
     END
-    assert_match /1\n2\n3\n4/, output
+    assert_match(/1\n2\n3\n4/, output)
   end
 
   def test_greater_than
@@ -134,7 +136,7 @@ class BasicTest < Test::Unit::TestCase
       30 IF I>5 THEN PRINT "GREATER THAN 5"
       RUN
     END
-    assert_match /GREATER THAN 3/, output
+    assert_match(/GREATER THAN 3/, output)
   end
 
   def test_precedence1
@@ -216,7 +218,7 @@ class BasicTest < Test::Unit::TestCase
       20 IF A = 0.4 THEN PRINT "HELLO"
       RUN
     END
-    assert_match("HELLO", output)
+    assert_match('HELLO', output)
   end
 
   def test_string_equal
@@ -225,7 +227,7 @@ class BasicTest < Test::Unit::TestCase
       20 IF A$ = "HA" THEN PRINT "HELLO"
       RUN
     END
-    assert_match /HELLO/,output
+    assert_match(/HELLO/, output)
   end
 
   def test_if_else
@@ -236,7 +238,7 @@ class BasicTest < Test::Unit::TestCase
       30 IF I>5 THEN PRINT "GREATER THAN 5" ELSE PRINT "NOT GREATER THAN 5"
       RUN
     END
-    assert_equal ["GREATER THAN 3","NOT GREATER THAN 4","NOT GREATER THAN 5"].join("\n"), output
+    assert_equal ['GREATER THAN 3', 'NOT GREATER THAN 4', 'NOT GREATER THAN 5'].join("\n"), output
   end
 
   def test_less_than_or_equal_to
@@ -247,7 +249,7 @@ class BasicTest < Test::Unit::TestCase
       30 IF I<=5 THEN PRINT "LTE THAN 5"
       RUN
     END
-    assert_match /LTE THAN 4\nLTE THAN 5/, output
+    assert_match(/LTE THAN 4\nLTE THAN 5/, output)
   end
 
   def test_greater_than_or_equal_to
@@ -258,7 +260,7 @@ class BasicTest < Test::Unit::TestCase
       30 IF I>=5 THEN PRINT "GTE THAN 5"
       RUN
     END
-    assert_match /GTE THAN 3\nGTE THAN 4/, output
+    assert_match(/GTE THAN 3\nGTE THAN 4/, output)
   end
 
   def test_less_than
@@ -269,7 +271,7 @@ class BasicTest < Test::Unit::TestCase
       30 IF I<5 THEN PRINT "LESS THAN 5"
       RUN
     END
-    assert_match /LESS THAN 5/, output
+    assert_match(/LESS THAN 5/, output)
   end
 
   def test_dim_defines_an_array
@@ -280,7 +282,7 @@ class BasicTest < Test::Unit::TestCase
       40 PRINT "RESULT ";A(B)
       RUN
     END
-    assert_match /RESULT 2/, output
+    assert_match(/RESULT 2/, output)
   end
 
   def test_multidimensional_string_arrays
@@ -297,7 +299,7 @@ class BasicTest < Test::Unit::TestCase
     90 NEXT I
     RUN
   END
-  result = <<END
+    result = <<END
 xxx
 xAB
 xxC
@@ -358,7 +360,7 @@ END
       30 IF I<>5 THEN PRINT "NOT 5"
       RUN
     END
-    assert_match /NOT 3\nNOT 5/, output
+    assert_match(/NOT 3\nNOT 5/, output)
   end
 
   def test_integer_division_should_result_in_float
@@ -368,7 +370,7 @@ END
       30 PRINT I/J
       RUN
     END
-    assert_in_delta 4/3.0,output.to_f,0.0001
+    assert_in_delta 4 / 3.0, output.to_f, 0.0001
   end
 
   def test_should_list_program
@@ -385,8 +387,7 @@ END
       140 PRINT " THAN ";G$
     END
     expected = program
-    actual = capture([program, "LIST"].join("\n"))
-    assert_equal expected, actual, ["---- actual ----", actual, "---- expected ----", expected].join("\n\n")
+    actual = capture([program, 'LIST'].join("\n"))
+    assert_equal expected, actual, ['---- actual ----', actual, '---- expected ----', expected].join("\n\n")
   end
-
 end
