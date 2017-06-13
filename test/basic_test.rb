@@ -321,16 +321,16 @@ END
       90 NEXT I
       RUN
     END
-    result = <<END
+    result = """
 000
 033
 003
-END
+"""
     assert_equal result.chomp, output
   end
 
   def test_assignment_to_multidimensional_number_arrays
-    output = capture <<-'END'
+    output = capture """
       10 DIM A(3,3)
       20 LET A(1,1) = 3
       30 LET A(1,2) = 3
@@ -343,7 +343,7 @@ END
       85 PRINT
       90 NEXT I
       RUN
-    END
+    """
     result = <<END
 000
 033
@@ -364,12 +364,12 @@ END
   end
 
   def test_integer_division_should_result_in_float
-    output = capture <<-'END'
+    output = capture """
       10 LET I=4
       20 LET J=3
       30 PRINT I/J
       RUN
-    END
+    """
     assert_in_delta 4 / 3.0, output.to_f, 0.0001
   end
 

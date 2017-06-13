@@ -17,7 +17,7 @@ suite = collector.collect($0.sub(/\.rb\Z/, ''))
 tests_to_do = suite.tests[0].tests
 tests_done = []
 
-puts tests_to_do
+#puts tests_to_do
 
 #until tests_to_do.empty? do
   #tests_to_do.each do |test|
@@ -27,7 +27,7 @@ puts tests_to_do
       suite << done_test
     end
     suite << test
-    suite.run(Test::Unit::TestResult.new) { |a| puts a}
+    suite.run(Test::Unit::TestResult.new) { |a| }
   #end
 #end
 
@@ -38,8 +38,33 @@ require 'unparser'
 
 paths = coverage.keys.select { |path| path =~ /BASIC/ }
 
-ruby_file = File.read(paths[1])
-puts paths[1]
-parse_tree = Parser::CurrentRuby.parse(ruby_file)
-puts parse_tree.children[4].location.line, parse_tree.children[4].location.last_line
-puts Unparser.unparse(parse_tree.children[4])
+class CoverageCleaner < Struct.new(:coverage)
+
+  def process(node)
+
+    return node unless node.is_a? Parser::AST::Node
+    return node unless node.location.expression
+
+    first_line, last_line = node.location.first_line-1, node.location.last_line-1
+    if coverage[first_line..last_line].compact.empty? or coverage[first_line..last_line].compact.inject(0, :+) == 0
+      :empty
+    else
+      node.updated(node.type, cleaned(node), {location: node.location})
+    end
+  end
+
+  def cleaned(nodes)
+    nodes.to_a.map { |node| process(node) }.delete_if {|e| e == :empty }
+  end
+end
+
+paths.each do | path |
+#path = paths[2]
+  ruby_source = File.read(path)
+  coverage_result = coverage[path]
+  coverage_result
+  parse_tree = Parser::CurrentRuby.parse(ruby_source)
+  cleaner = CoverageCleaner.new(coverage_result)
+  cleaned = cleaner.process(parse_tree)
+  puts Unparser.unparse(cleaned)
+end
